@@ -10,3 +10,6 @@ swag:
 clean:
 	rm -rf bin/
 	rm -rf docs/
+
+dev:
+	air
