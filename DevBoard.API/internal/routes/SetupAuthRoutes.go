@@ -1,15 +1,15 @@
 package routes
 
 import (
-	"project-devboard/cmd/middleware"
 	"project-devboard/internal/handler"
+	"project-devboard/internal/middleware"
 	"project-devboard/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
 
 // SetupAuthRoutes - Auth route'larını yapılandır
-func SetupAuthRoutes(r *gin.RouterGroup, authHandler *handler.AuthHandler, jwtService services.JWTService) {
+func SetupAuthRoutes(r *gin.RouterGroup, authHandler *handler.AuthHandler, jwtService services.JWTService, accessTokenCookieName, refreshTokenCookieName string) {
 	// Public auth endpoints (no authentication required)
 	auth := r.Group("/auth")
 	{
@@ -23,7 +23,7 @@ func SetupAuthRoutes(r *gin.RouterGroup, authHandler *handler.AuthHandler, jwtSe
 
 	// Protected auth endpoints (authentication required)
 	authProtected := r.Group("/auth")
-	authProtected.Use(middleware.JWTMiddleware(jwtService))
+	authProtected.Use(middleware.JWTMiddleware(jwtService, accessTokenCookieName))
 	{
 		authProtected.GET("/me", authHandler.GetMe)
 	}

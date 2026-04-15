@@ -2,27 +2,15 @@ package entities
 
 import (
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
-// UserRole - Kullanıcı rolleri (many-to-many)
 type UserRole struct {
-	ID     uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	UserID uuid.UUID `gorm:"type:uuid;not null"`
-	RoleID uuid.UUID `gorm:"type:uuid;not null"`
-
+	UserId uuid.UUID `gorm:"type:uuid;primaryKey"`
+	RoleId int       `gorm:"type:integer;primaryKey"`
 	BaseEntity
 
-	// Relations
-	User User `gorm:"foreignKey:UserID"`
-	Role Role `gorm:"foreignKey:RoleID"`
+	User User `gorm:"foreignKey:UserId;references:Id"`
+	Role Role `gorm:"foreignKey:RoleId;references:Id"`
 }
 
-func (UserRole) TableName() string { return "core.UserRoles" }
-
-func (ur *UserRole) BeforeCreate(tx *gorm.DB) error {
-	if ur.ID == uuid.Nil {
-		ur.ID = uuid.New()
-	}
-	return nil
-}
+func (UserRole) TableName() string { return "UserRoles" }

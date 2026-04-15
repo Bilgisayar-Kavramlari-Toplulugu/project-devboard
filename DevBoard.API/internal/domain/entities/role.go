@@ -1,26 +1,11 @@
 package entities
 
-import (
-	"github.com/google/uuid"
-	"gorm.io/gorm"
-)
-
-// Role - Roller
 type Role struct {
-	ID   uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	Name string    `gorm:"type:text;not null"`
-
+	Id   int   `gorm:"type:integer;primaryKey"`
+	Name string `gorm:"type:varchar(500);not null"`
 	BaseEntity
 
-	// Relations
-	UserRoles []UserRole `gorm:"foreignKey:RoleID"`
+	UserRoles []UserRole `gorm:"foreignKey:RoleId"`
 }
 
-func (Role) TableName() string { return "core.Roles" }
-
-func (r *Role) BeforeCreate(tx *gorm.DB) error {
-	if r.ID == uuid.Nil {
-		r.ID = uuid.New()
-	}
-	return nil
-}
+func (Role) TableName() string { return "Roles" }

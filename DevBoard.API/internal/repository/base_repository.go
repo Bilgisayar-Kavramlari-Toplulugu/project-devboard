@@ -2,6 +2,8 @@
 package repository
 
 import (
+	"errors"
+
 	"gorm.io/gorm"
 )
 
@@ -30,9 +32,13 @@ func (r *baseRepository[T, ID]) GetByID(id ID) (*T, error) {
 	var entity T
 	err := r.db.First(&entity, id).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &entity, nil
+
 }
 
 func (r *baseRepository[T, ID]) List(limit, offset int) ([]T, error) {

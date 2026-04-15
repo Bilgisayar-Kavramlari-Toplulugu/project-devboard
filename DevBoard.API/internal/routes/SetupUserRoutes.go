@@ -2,13 +2,15 @@ package routes
 
 import (
 	"project-devboard/internal/handler"
+	"project-devboard/internal/middleware"
 	"project-devboard/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
 
-func SetupUserRoutes(rg *gin.RouterGroup, h *handler.UserHandler, jwtService services.JWTService) {
+func SetupUserRoutes(rg *gin.RouterGroup, h *handler.UserHandler, jwtService services.JWTService, accessTokenCookieName, refreshTokenCookieName string) {
 	users := rg.Group("/users")
+	users.Use(middleware.JWTMiddleware(jwtService, accessTokenCookieName))
 	{
 		users.GET("", h.List)
 		users.GET("/:id", h.GetByID)

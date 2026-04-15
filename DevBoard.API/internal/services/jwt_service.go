@@ -34,7 +34,7 @@ type JWTService interface {
 	ValidateAccessToken(tokenString string) (*Claims, error)
 	ValidateRefreshToken(tokenString string) (*Claims, error)
 	RefreshTokens(refreshToken string, userID uuid.UUID) (*TokenPair, error)
-	CreateSession(userID uuid.UUID, refreshToken string, deviceInfo []byte, ipAddress, userAgent string) error
+	CreateSession(userID uuid.UUID, refreshToken string) error
 	RevokeSession(refreshTokenHash string) error
 }
 
@@ -157,7 +157,7 @@ func (s *jwtService) RefreshTokens(refreshToken string, userID uuid.UUID) (*Toke
 		return nil, errors.New("session expired")
 	}
 
-	role := "Basic" // default role
+	role := "Developer"
 	if len(user.UserRoles) > 0 && user.UserRoles[0].Role.Name != "" {
 		role = user.UserRoles[0].Role.Name
 	}
@@ -167,7 +167,7 @@ func (s *jwtService) RefreshTokens(refreshToken string, userID uuid.UUID) (*Toke
 }
 
 // CreateSession - Yeni session oluştur
-func (s *jwtService) CreateSession(userID uuid.UUID, refreshToken string, deviceInfo []byte, ipAddress, userAgent string) error {
+func (s *jwtService) CreateSession(userID uuid.UUID, refreshToken string) error {
 	// Refresh token'ı hash'le
 	hash := sha256.Sum256([]byte(refreshToken))
 	refreshTokenHash := hex.EncodeToString(hash[:])
@@ -177,9 +177,6 @@ func (s *jwtService) CreateSession(userID uuid.UUID, refreshToken string, device
 	return s.db.Model(&entities.User{}).Where("id = ?", userID).Updates(map[string]interface{}{
 		"refresh_token_hash": refreshTokenHash,
 		"refresh_token_exp":  expiresAt,
-		"device_info":        deviceInfo,
-		"ip_address":         ipAddress,
-		"user_agent":         userAgent,
 	}).Error
 }
 
@@ -190,8 +187,5 @@ func (s *jwtService) RevokeSession(refreshTokenHash string) error {
 		Updates(map[string]interface{}{
 			"refresh_token_hash": nil,
 			"refresh_token_exp":  nil,
-			"device_info":        nil,
-			"ip_address":         nil,
-			"user_agent":         nil,
 		}).Error
 }

@@ -11,9 +11,9 @@ import (
 type BaseEntity struct {
 	IsActive       bool       `gorm:"type:boolean;not null;default:true"`
 	CreatedOn      time.Time  `gorm:"not null;type:timestamp with time zone;default:now()"`
-	CreatedBy      uuid.UUID  `gorm:"type:uuid;not null;default:db87eb91-b46d-4fa3-8a8d-c7dc815fe0dd"`
+	CreatedBy      uuid.UUID  `gorm:"type:uuid;not null"`
 	LastModifiedOn time.Time  `gorm:"not null;type:timestamp with time zone;default:now()"`
-	LastModifiedBy uuid.UUID  `gorm:"type:uuid;not null;default:db87eb91-b46d-4fa3-8a8d-c7dc815fe0dd"`
+	LastModifiedBy uuid.UUID  `gorm:"type:uuid;not null"`
 	DeletedOn      *time.Time `gorm:"type:timestamp with time zone"`
 	DeletedBy      *uuid.UUID `gorm:"type:uuid"`
 }
