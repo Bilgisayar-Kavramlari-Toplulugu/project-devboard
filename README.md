@@ -1,7 +1,7 @@
 # project-devboard
 
 DevBoard backend iskeleti bu repo içinde `DevBoard.API/` altında duruyor.
-
+d
 Dokümanlar:
 
 - `docs/Project-Map.md`: Hangi klasör ve dosya ne işe yarıyor.
