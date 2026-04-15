@@ -24,6 +24,7 @@ func RunMigrations(db *gorm.DB) {
 	// Seviye 1: Sadece Seviye 0'a bağımlı tablolar
 	if err := db.AutoMigrate(
 		&domain.UserRole{}, // -> User, Role
+		&domain.PasswordResetToken{},
 	); err != nil {
 		log.Fatal("Migration Failed (Level 1 - User dependent tables):", err)
 	}

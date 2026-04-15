@@ -2,14 +2,12 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
-	"project-devboard/internal/domain/entities"
+	"project-devboard/internal/dtos"
 	"project-devboard/internal/services"
+	"project-devboard/pkg/apperrors"
 	"project-devboard/pkg/response"
 	"project-devboard/pkg/validator"
-
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -21,18 +19,7 @@ type UserHandler struct {
 }
 
 func NewUserHandler(service services.UserService, validator *validator.Validator) *UserHandler {
-	return &UserHandler{
-		service:   service,
-		validator: validator,
-	}
-}
-
-type CreateUserRequest struct {
-	Email            string `json:"email" validate:"required,email"`
-	Password         string `json:"password" validate:"required,min=6"`
-	Firstname        string `json:"firstname" validate:"required,min=2,max=100"`
-	Lastname         string `json:"lastname" validate:"required,min=2,max=100"`
-	IsEmailValidated bool   `json:"is_email_validated" validate:"required"`
+	return &UserHandler{service: service, validator: validator}
 }
 
 // Create godoc
@@ -41,54 +28,35 @@ type CreateUserRequest struct {
 // @Tags         users
 // @Accept       json
 // @Produce      json
-// @Param        request body CreateUserRequest true "Create User Request"
-// @Success      201  {object}  entities.User "Created User"
-// @Failure      400  {object}  response.Response "Bad Request"
-// @Failure      500  {object}  response.Response "Internal Server Error"
+// @Param        request  body      dtos.UserCreateRequest  true  "Create User Request"
+// @Success      201      {object}  UserEnvelope
+// @Failure      400      {object}  response.Response  "Bad Request"
+// @Failure      401      {object}  response.Response  "Unauthorized"
+// @Failure      409      {object}  response.Response  "User already exists"
+// @Failure      500      {object}  response.Response  "Internal Server Error"
 // @Router       /users [post]
 func (h *UserHandler) Create(c *gin.Context) {
-	var req CreateUserRequest
+	var req dtos.UserCreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, http.StatusBadRequest, "Invalid request body")
+		c.Error(apperrors.New(apperrors.InvalidRequest, apperrors.ErrInvalidRequest))
 		return
 	}
 
 	if err := h.validator.Validate(req); err != nil {
-		response.ValidationError(c, err)
+		fieldErrors := h.validator.FormatErrors(err)
+		c.Error(apperrors.Validation(toAppFieldErrors(fieldErrors)))
 		return
 	}
 
-	// Hash the password before storing
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	userID := userIDFromContext(c, uuid.Nil)
+
+	user, err := h.service.CreateUser(c.Request.Context(), req, userID)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "Failed to hash password")
+		c.Error(err)
 		return
 	}
 
-	userID := uuid.New()
-	user := &entities.User{
-		ID:               userID,
-		Email:            req.Email,
-		Firstname:        req.Firstname,
-		Lastname:         req.Lastname,
-		Password:         string(hashedPassword), // Store hashed password
-		IsEmailValidated: req.IsEmailValidated,
-		BaseEntity: entities.BaseEntity{
-			IsActive:       true,
-			CreatedBy:      userID,
-			LastModifiedBy: userID,
-		},
-	}
-
-	if err := h.service.CreateUser(user); err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// Hide password in response
-	user.Password = ""
-
-	response.Success(c, http.StatusCreated, user)
+	response.Success(c, http.StatusCreated, dtos.NewUserResponse(user))
 }
 
 // GetByID godoc
@@ -98,27 +66,26 @@ func (h *UserHandler) Create(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        id   path      string  true  "User UUID"
-// @Success      200  {object}  entities.User
-// @Failure      400  {object}  response.Response "Invalid ID"
-// @Failure      404  {object}  response.Response "User not found"
+// @Success      200  {object}  UserEnvelope
+// @Failure      400  {object}  response.Response  "Invalid ID"
+// @Failure      401  {object}  response.Response  "Unauthorized"
+// @Failure      404  {object}  response.Response  "User not found"
+// @Failure      500  {object}  response.Response  "Internal Server Error"
 // @Router       /users/{id} [get]
 func (h *UserHandler) GetByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Invalid ID")
+		c.Error(apperrors.New(apperrors.BadRequest, apperrors.ErrInvalidRequest))
 		return
 	}
 
 	user, err := h.service.GetUser(id)
 	if err != nil {
-		response.Error(c, http.StatusNotFound, "User not found")
+		c.Error(err)
 		return
 	}
 
-	// Hide password in response
-	user.Password = ""
-
-	response.Success(c, http.StatusOK, user)
+	response.Success(c, http.StatusOK, dtos.NewUserResponse(user))
 }
 
 // List godoc
@@ -129,25 +96,20 @@ func (h *UserHandler) GetByID(c *gin.Context) {
 // @Produce      json
 // @Param        limit   query     int  false  "Limit (default 10)"
 // @Param        offset  query     int  false  "Offset (default 0)"
-// @Success      200  {array}   entities.User
-// @Failure      500  {object}  response.Response "Internal Server Error"
+// @Success      200     {object}  UserListEnvelope
+// @Failure      401     {object}  response.Response  "Unauthorized"
+// @Failure      500     {object}  response.Response  "Internal Server Error"
 // @Router       /users [get]
 func (h *UserHandler) List(c *gin.Context) {
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
-	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	limit, offset := paginationParams(c)
 
 	users, err := h.service.ListUsers(limit, offset)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "Failed to fetch users")
+		c.Error(err)
 		return
 	}
 
-	// Hide passwords in response
-	for i := range users {
-		users[i].Password = ""
-	}
-
-	response.Success(c, http.StatusOK, users)
+	response.Success(c, http.StatusOK, dtos.NewUserResponses(users))
 }
 
 // Update godoc
@@ -156,54 +118,43 @@ func (h *UserHandler) List(c *gin.Context) {
 // @Tags         users
 // @Accept       json
 // @Produce      json
-// @Param        id      path      string             true  "User UUID"
-// @Param        request body      CreateUserRequest  true  "Update User Request"
-// @Success      200     {object}  entities.User
-// @Failure      400     {object}  response.Response "Bad Request"
-// @Failure      500     {object}  response.Response "Internal Server Error"
+// @Param        id       path      string                 true  "User UUID"
+// @Param        request  body      dtos.UserUpdateRequest true  "Update User Request"
+// @Success      200      {object}  UserEnvelope
+// @Failure      400      {object}  response.Response  "Bad Request"
+// @Failure      401      {object}  response.Response  "Unauthorized"
+// @Failure      404      {object}  response.Response  "User not found"
+// @Failure      409      {object}  response.Response  "User already exists"
+// @Failure      500      {object}  response.Response  "Internal Server Error"
 // @Router       /users/{id} [put]
 func (h *UserHandler) Update(c *gin.Context) {
-	ID, err := uuid.Parse(c.Param("ID"))
+	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Invalid ID")
+		c.Error(apperrors.New(apperrors.BadRequest, apperrors.ErrInvalidRequest))
 		return
 	}
 
-	var req CreateUserRequest
+	var req dtos.UserUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, http.StatusBadRequest, "Invalid request body")
+		c.Error(apperrors.New(apperrors.InvalidRequest, apperrors.ErrInvalidRequest))
 		return
 	}
 
 	if err := h.validator.Validate(req); err != nil {
-		response.ValidationError(c, err)
+		fieldErrors := h.validator.FormatErrors(err)
+		c.Error(apperrors.Validation(toAppFieldErrors(fieldErrors)))
 		return
 	}
 
-	// Hash the password before updating if provided
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	userID := userIDFromContext(c, id)
+
+	user, err := h.service.UpdateUser(c.Request.Context(), id, req, userID)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "Failed to hash password")
+		c.Error(err)
 		return
 	}
 
-	user := &entities.User{
-		ID:        ID,
-		Email:     req.Email,
-		Firstname: req.Firstname,
-		Lastname:  req.Lastname,
-		Password:  string(hashedPassword), // Store hashed password
-	}
-
-	if err := h.service.UpdateUser(user); err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// Hide password in response
-	user.Password = ""
-
-	response.Success(c, http.StatusOK, user)
+	response.Success(c, http.StatusOK, dtos.NewUserResponse(user))
 }
 
 // Delete godoc
@@ -213,21 +164,32 @@ func (h *UserHandler) Update(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        id   path      string  true  "User UUID"
-// @Success      200  {object}  map[string]string "Success message"
-// @Failure      400  {object}  response.Response "Invalid ID"
-// @Failure      500  {object}  response.Response "Internal Server Error"
+// @Success      204  {string}  string  "No Content"
+// @Failure      400  {object}  response.Response  "Invalid ID"
+// @Failure      401  {object}  response.Response  "Unauthorized"
+// @Failure      404  {object}  response.Response  "User not found"
+// @Failure      500  {object}  response.Response  "Internal Server Error"
 // @Router       /users/{id} [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Invalid ID")
+		c.Error(apperrors.New(apperrors.BadRequest, apperrors.ErrInvalidRequest))
 		return
 	}
 
 	if err := h.service.DeleteUser(id); err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
+		c.Error(err)
 		return
 	}
 
-	response.Success(c, http.StatusOK, gin.H{"message": "User deleted successfully"})
+	response.Success(c, http.StatusNoContent, nil)
+}
+
+// helpers
+func toAppFieldErrors(errs []validator.ValidationError) []apperrors.FieldError {
+	result := make([]apperrors.FieldError, len(errs))
+	for i, e := range errs {
+		result[i] = apperrors.FieldError{Field: e.Field, Message: e.Message}
+	}
+	return result
 }

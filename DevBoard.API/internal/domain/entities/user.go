@@ -4,40 +4,46 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
-// User - Kullanıcılar
 type User struct {
-	// Props
-	ID                uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	Email             string    `gorm:"type:text;uniqueIndex;not null"`
-	Password          string    `gorm:"type:text"`
-	Firstname         string    `gorm:"type:text;not null"`
-	Lastname          string    `gorm:"type:varchar(500)"`
-	IsEmailValidated  bool      `gorm:"type:boolean;not null;default:false"`
-	PhoneNumber       *string   `gorm:"type:varchar(500)"`
-	ProfilePictureUrl *string   `gorm:"type:text"`
-
-	// Session properties
-	RefreshTokenHash *string    `gorm:"type:text"`
-	RefreshTokenExp  *time.Time
-	DeviceInfo       []byte     `gorm:"type:jsonb"`
-	IPAddress        *string    `gorm:"type:varchar(500)"`
-	UserAgent        *string    `gorm:"type:text"`
-
+	Id                 uuid.UUID  `gorm:"type:uuid;primaryKey"`
+	Email              string     `gorm:"type:varchar(500);not null"`
+	Password           string     `gorm:"type:varchar(500);not null" json:"-"`
+	Firstname          string     `gorm:"type:varchar(500);not null"`
+	Lastname           string     `gorm:"type:varchar(500);not null"`
+	PhoneNumber        *string    `gorm:"type:varchar(500)"`
+	CityId             *int       `gorm:"type:integer"`
+	Birthdate          *time.Time `gorm:"type:timestamp"`
+	Gender             *int       `gorm:"type:integer"`
+	ProfilePicturePath *string    `gorm:"type:varchar(500)"`
+	Title              *string    `gorm:"type:varchar(500)"`
+	RefreshTokenHash   *string    `gorm:"type:varchar(500)" json:"-"`
+	RefreshTokenExp    *time.Time `gorm:"type:timestamp" json:"-"`
+	UserAgent          *string    `gorm:"type:varchar(500)" json:"-"`
+	IsEmailValidated   bool       `gorm:"type:boolean;default:false"`
 	BaseEntity
 
-	// Relations
-	UserRoles []UserRole `gorm:"foreignKey:UserID"`
+	City                    *City                  `gorm:"foreignKey:CityId"`
+	UserRoles               []UserRole             `gorm:"foreignKey:UserId"`
+	UserJobTypes            []UserJobType          `gorm:"foreignKey:UserId"`
+	UserWorkLocationTypes   []UserWorkLocationType `gorm:"foreignKey:UserId"`
+	UserSkills              []UserSkill            `gorm:"foreignKey:UserId"`
+	Certificates            []Certificate          `gorm:"foreignKey:UserId"`
+	Experiences             []Experience           `gorm:"foreignKey:UserId"`
+	Educations              []Education            `gorm:"foreignKey:UserId"`
+	ProfessionalProfiles    []ProfessionalProfile  `gorm:"foreignKey:UserId"`
+	References              []Reference            `gorm:"foreignKey:UserId"`
+	Projects                []Project              `gorm:"foreignKey:UserId"`
+	SavedFilters            []SavedFilter          `gorm:"foreignKey:OwnerId"`
+	SavedDevelopersByUser   []SavedDeveloper       `gorm:"foreignKey:UserId"`
+	SavedDevelopersByDev    []SavedDeveloper       `gorm:"foreignKey:DeveloperId"`
+	SavedProjects           []SavedProject         `gorm:"foreignKey:UserId"`
+	SentMessages            []Message              `gorm:"foreignKey:SenderId"`
+	ReceivedMessages        []Message              `gorm:"foreignKey:ReceiverId"`
+	PublicEndorsementsSent  []PublicEndorsement    `gorm:"foreignKey:SenderUserId"`
+	ProjectDevelopers       []ProjectDeveloper     `gorm:"foreignKey:DeveloperId"`
+	ProjectEndorsementsSent []ProjectEndorsement   `gorm:"foreignKey:SenderId"`
 }
 
-func (User) TableName() string { return "core.Users" }
-
-// BeforeCreate hooks - UUID otomatik oluşturma
-func (u *User) BeforeCreate(tx *gorm.DB) error {
-	if u.ID == uuid.Nil {
-		u.ID = uuid.New()
-	}
-	return nil
-}
+func (User) TableName() string { return "Users" }

@@ -1,12 +1,15 @@
 package main
 
 import (
+	"errors"
 	"log"
+	"net/url"
 	"strings"
 
 	"project-devboard/internal/config"
 	"project-devboard/internal/db_plugins"
 	"project-devboard/internal/handler"
+	"project-devboard/internal/middleware"
 	"project-devboard/internal/repository"
 	"project-devboard/internal/routes"
 	"project-devboard/internal/services"
@@ -17,7 +20,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	_ "project-devboard/docs" // yourprojectname yerine kendi module adınızı yazın
+	_ "project-devboard/docs"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -27,152 +30,159 @@ import (
 // @version         1.0
 // @description     Bu API'nin açıklaması
 // @termsOfService  http://swagger.io/terms/
-
 // @contact.name   API Destek
 // @contact.url    http://www.swagger.io/support
 // @contact.email  support@swagger.io
-
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
-
 // @host      localhost:8080
 // @BasePath  /api/v1
 func main() {
-	// 1. Config
 	cfg := config.Load()
 
-	// 2. Database - önce veritabanını oluştur
 	createDatabaseIfNotExists(cfg.DatabaseURL)
 
-	// Sonra bağlan
 	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Database Connection Failed:", err)
 	}
-	// Auto Migration
-	config.RunMigrations(db)
 
-	//Plugins
+	config.RunMigrations(db)
 	db.Use(&db_plugins.TimestampPlugin{})
 
-	// 3. Validator
 	v := validator.New()
 
-	// 4. Dependency Injection
-
-	// Level-0 Entity Repositories
+	// Repositories
 	userRepo := repository.NewUserRepository(db)
-	roleRepo := repository.NewRoleRepository(db)
-	userRoleRepo := repository.NewUserRoleRepository(db)
 
-	// Level-0 Entity Services
-	userService := services.NewUserService(userRepo)
-	roleService := services.NewRoleService(roleRepo)
-	userRoleService := services.NewUserRoleService(userRoleRepo)
-
-	// Level-0 Entity Handlers
-	userHandler := handler.NewUserHandler(userService, v)
-	roleHandler := handler.NewRoleHandler(roleService, v)
-	userRoleHandler := handler.NewUserRoleHandler(userRoleService, v)
-
-	// JWT Service, Email Service ve Auth Handler
+	// Services
 	jwtService := services.NewJWTService(cfg, db)
-	authHandler := handler.NewAuthHandler(jwtService, cfg, db, v)
+	authService := services.NewAuthService(db, userRepo, jwtService, cfg)
+	userService := services.NewUserService(userRepo)
 
-	// Device Token Service ve Handler (legacy - will be refactored)
+	// Handlers
+	authHandler := handler.NewAuthHandler(authService, v, cfg)
+	userHandler := handler.NewUserHandler(userService, v)
 
-	// Metadata Service
+	// Router
+	r := gin.New()
+	r.Use(gin.Logger())
+	r.Use(middleware.GlobalErrorHandler())
 
-	// 5. Router
-	r := gin.Default()
-
-	// Redis'i başlat
-	// redisClient := config.InitRedis()
-	// defer config.CloseRedis() // Program kapanırken kapat
-
-	// Route yapılandırması Redisli
-	// routeConfigWithRedis := &routes.RouteConfig{
-	// 	DB:          db,
-	// 	RedisClient: redisClient,
-	// 	UserHandler: userHandler,
-	// }
-	// routes.SetupRoutes(r, routeConfigWithRedis)
-
-	// Route yapılandırması No Redis
-	routeConfig := &routes.RouteConfig{
-		DB:              db,
-		UserHandler:     userHandler,
-		RoleHandler:     roleHandler,
-		UserRoleHandler: userRoleHandler,
-		AuthHandler:     authHandler,
-		JWTService:      jwtService,
-	}
-
-	// 5. CORS Middleware - Flutter web'den gelen isteklere izin ver
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:*", "http://127.0.0.1:*", "http://localhost", "http://127.0.0.1"},
+		AllowOrigins:     cfg.CORSAllowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
-			// Development: Allow all localhost and 127.0.0.1 origins
+			for _, allowedOrigin := range cfg.CORSAllowedOrigins {
+				if origin == allowedOrigin {
+					return true
+				}
+			}
+
 			return strings.HasPrefix(origin, "http://localhost") ||
 				strings.HasPrefix(origin, "http://127.0.0.1")
 		},
 	}))
 
-	// 6. Setup Routes
-	routes.SetupRoutes(r, routeConfig)
+	routes.SetupRoutes(r, &routes.RouteConfig{
+		DB:                     db,
+		UserHandler:            userHandler,
+		AuthHandler:            authHandler,
+		JWTService:             jwtService,
+		AccessTokenCookieName:  cfg.AccessTokenCookieName,
+		RefreshTokenCookieName: cfg.RefreshTokenCookieName,
+	})
 
-	// Swagger route
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// 6. Start Server
 	if err := r.Run(cfg.ServerAddress); err != nil {
 		log.Fatal("Server start failed:", err)
 	}
 }
 
 func createDatabaseIfNotExists(databaseURL string) {
-	// postgres veritabanına bağlan (her zaman vardır)
-	adminDB := strings.Replace(databaseURL, "dbname=SaivierDB", "dbname=postgres", 1)
+	databaseName, err := extractDatabaseName(databaseURL)
+	if err != nil {
+		log.Fatal("Database name could not be determined from DATABASE_URL:", err)
+	}
+
+	adminDB := replaceDatabaseName(databaseURL, "postgres")
 
 	db, err := gorm.Open(postgres.Open(adminDB), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Admin DB Connection Failed:", err)
 	}
 
-	// SaivierDB var mı kontrol et
-	result := db.Exec("SELECT 1 FROM pg_database WHERE datname = 'SaivierDB'")
-	if result.RowsAffected == 0 {
-		// Yoksa oluştur
-		db.Exec("CREATE DATABASE \"SaivierDB\"")
-		log.Println("Database SaivierDB created successfully")
+	var databaseCount int64
+	if err := db.Raw("SELECT COUNT(1) FROM pg_database WHERE datname = ?", databaseName).Scan(&databaseCount).Error; err != nil {
+		log.Fatal("Database existence check failed:", err)
 	}
 
-	// Admin bağlantısını kapat
+	if databaseCount == 0 {
+		if err := db.Exec(`CREATE DATABASE "` + strings.ReplaceAll(databaseName, `"`, `""`) + `"`).Error; err != nil {
+			log.Fatal("Database creation failed:", err)
+		}
+		log.Printf("Database %s created successfully\n", databaseName)
+	}
+
 	sqlDB, _ := db.DB()
 	sqlDB.Close()
 }
 
-// ## Ne Zaman Neyi Kullanmalı?
+func extractDatabaseName(databaseURL string) (string, error) {
+	if databaseURL == "" {
+		return "", errors.New("empty DATABASE_URL")
+	}
 
-// | İhtiyaç | Kullan | Neden |
-// |---------|--------|-------|
-// | Rate limiting sayacı | **Redis** | Hızlı, TTL ile otomatik temizlik |
-// | API call history | **PostgreSQL** | Kalıcı kayıt, analiz için |
-// | Geçici sayaçlar | **Redis** | Performans |
-// | Kalıcı veri | **PostgreSQL** | Güvenilirlik |
+	if strings.HasPrefix(databaseURL, "postgres://") || strings.HasPrefix(databaseURL, "postgresql://") {
+		parsed, err := url.Parse(databaseURL)
+		if err != nil {
+			return "", err
+		}
 
-// ## Özet Akış
-// ```
-// İstek geldi
-//   ↓
-// 1. API key doğrula (PostgreSQL)
-//   ↓
-// 2. Rate limit kontrolü (Redis) ← HIZLI
-//   ↓
-// 3. İstek işlenir
-//   ↓
-// 4. API call log (PostgreSQL) ← ASYNC, bloklama yok
+		databaseName := strings.TrimPrefix(parsed.Path, "/")
+		if databaseName == "" {
+			return "", errors.New("missing database name in URL path")
+		}
+
+		return databaseName, nil
+	}
+
+	for _, part := range strings.Fields(databaseURL) {
+		if strings.HasPrefix(part, "dbname=") {
+			databaseName := strings.Trim(strings.TrimPrefix(part, "dbname="), `"'`)
+			if databaseName == "" {
+				return "", errors.New("empty dbname value")
+			}
+
+			return databaseName, nil
+		}
+	}
+
+	return "", errors.New("missing dbname in DATABASE_URL")
+}
+
+func replaceDatabaseName(databaseURL, databaseName string) string {
+	if strings.HasPrefix(databaseURL, "postgres://") || strings.HasPrefix(databaseURL, "postgresql://") {
+		parsed, err := url.Parse(databaseURL)
+		if err != nil {
+			return databaseURL
+		}
+
+		parsed.Path = "/" + databaseName
+		return parsed.String()
+	}
+
+	parts := strings.Fields(databaseURL)
+	for i, part := range parts {
+		if strings.HasPrefix(part, "dbname=") {
+			parts[i] = "dbname=" + databaseName
+			return strings.Join(parts, " ")
+		}
+	}
+
+	return databaseURL
+}

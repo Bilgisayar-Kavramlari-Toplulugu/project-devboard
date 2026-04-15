@@ -44,22 +44,25 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.ForgotPasswordRequest"
+                            "$ref": "#/definitions/dtos.ForgotPasswordRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success message",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/handler.MessageEnvelope"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -69,7 +72,7 @@ const docTemplate = `{
         },
         "/auth/login": {
             "post": {
-                "description": "Login with email and password, returns access and refresh tokens",
+                "description": "Login with email and password, sets session cookies, and returns a success message",
                 "consumes": [
                     "application/json"
                 ],
@@ -87,15 +90,15 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.LoginRequest"
+                            "$ref": "#/definitions/dtos.LoginRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Token Pair",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/services.TokenPair"
+                            "$ref": "#/definitions/handler.MessageEnvelope"
                         }
                     },
                     "400": {
@@ -106,6 +109,12 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Invalid credentials",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -133,22 +142,25 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.LogoutRequest"
+                            "$ref": "#/definitions/dtos.LogoutRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success message",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/handler.MessageEnvelope"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -158,12 +170,7 @@ const docTemplate = `{
         },
         "/auth/me": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get the currently authenticated user's information",
+                "description": "Get the currently authenticated user's information using the session cookie",
                 "consumes": [
                     "application/json"
                 ],
@@ -176,13 +183,25 @@ const docTemplate = `{
                 "summary": "Get current user",
                 "responses": {
                     "200": {
-                        "description": "Current User",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entities.User"
+                            "$ref": "#/definitions/handler.UserEnvelope"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -192,7 +211,7 @@ const docTemplate = `{
         },
         "/auth/refresh": {
             "post": {
-                "description": "Get new access and refresh tokens using a valid refresh token",
+                "description": "Rotate session cookies using a valid refresh token and return a success message",
                 "consumes": [
                     "application/json"
                 ],
@@ -210,15 +229,15 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.RefreshRequest"
+                            "$ref": "#/definitions/dtos.RefreshTokenRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "New Token Pair",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/services.TokenPair"
+                            "$ref": "#/definitions/handler.MessageEnvelope"
                         }
                     },
                     "400": {
@@ -229,6 +248,12 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Invalid refresh token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -256,18 +281,15 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.ResetPasswordRequest"
+                            "$ref": "#/definitions/dtos.ResetPasswordRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success message",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/handler.MessageEnvelope"
                         }
                     },
                     "400": {
@@ -281,13 +303,19 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
                     }
                 }
             }
         },
         "/auth/signup": {
             "post": {
-                "description": "Register a new user with email and password, returns access and refresh tokens",
+                "description": "Register a new user with email and password, sets session cookies, and returns a success message",
                 "consumes": [
                     "application/json"
                 ],
@@ -305,15 +333,15 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.SignupRequest"
+                            "$ref": "#/definitions/dtos.SignupRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Token Pair",
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/services.TokenPair"
+                            "$ref": "#/definitions/handler.MessageEnvelope"
                         }
                     },
                     "400": {
@@ -327,511 +355,11 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
-                    }
-                }
-            }
-        },
-        "/roles": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "roles"
-                ],
-                "summary": "List all roles",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "Limit",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Offset",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entities.Role"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "roles"
-                ],
-                "summary": "Create a new role",
-                "parameters": [
-                    {
-                        "description": "Role data",
-                        "name": "role",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.CreateRoleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Role"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/roles/{id}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "roles"
-                ],
-                "summary": "Get role by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Role ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Role"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "roles"
-                ],
-                "summary": "Update role",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Role ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Role data",
-                        "name": "role",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.UpdateRoleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Role"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "roles"
-                ],
-                "summary": "Delete role",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Role ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/user-roles": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-roles"
-                ],
-                "summary": "List all user roles",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "Limit",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Offset",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entities.UserRole"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-roles"
-                ],
-                "summary": "Create a new user role assignment",
-                "parameters": [
-                    {
-                        "description": "UserRole data",
-                        "name": "userRole",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.CreateUserRoleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/entities.UserRole"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/user-roles/me": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-roles"
-                ],
-                "summary": "Get current user's roles",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entities.UserRole"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/user-roles/role/{roleId}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-roles"
-                ],
-                "summary": "Get user roles by role ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Role ID",
-                        "name": "roleId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entities.UserRole"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/user-roles/{id}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-roles"
-                ],
-                "summary": "Get user role by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "UserRole ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entities.UserRole"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-roles"
-                ],
-                "summary": "Update user role",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "UserRole ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "UserRole data",
-                        "name": "userRole",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.UpdateUserRoleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entities.UserRole"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "user-roles"
-                ],
-                "summary": "Delete user role",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "UserRole ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -868,10 +396,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entities.User"
-                            }
+                            "$ref": "#/definitions/handler.UserListEnvelope"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
@@ -901,19 +432,31 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.CreateUserRequest"
+                            "$ref": "#/definitions/dtos.UserCreateRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created User",
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/entities.User"
+                            "$ref": "#/definitions/handler.UserEnvelope"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "User already exists",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -953,7 +496,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entities.User"
+                            "$ref": "#/definitions/handler.UserEnvelope"
                         }
                     },
                     "400": {
@@ -962,8 +505,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.Response"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
                     "404": {
                         "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -996,7 +551,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.CreateUserRequest"
+                            "$ref": "#/definitions/dtos.UserUpdateRequest"
                         }
                     }
                 ],
@@ -1004,11 +559,29 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entities.User"
+                            "$ref": "#/definitions/handler.UserEnvelope"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "User already exists",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1043,17 +616,26 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Success message",
+                    "204": {
+                        "description": "No Content",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "type": "string"
                         }
                     },
                     "400": {
                         "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1069,225 +651,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "entities.Role": {
-            "type": "object",
-            "properties": {
-                "createdBy": {
-                    "type": "string"
-                },
-                "createdOn": {
-                    "type": "string"
-                },
-                "deletedBy": {
-                    "type": "string"
-                },
-                "deletedOn": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "isActive": {
-                    "type": "boolean"
-                },
-                "lastModifiedBy": {
-                    "type": "string"
-                },
-                "lastModifiedOn": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "userRoles": {
-                    "description": "Relations",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.UserRole"
-                    }
-                }
-            }
-        },
-        "entities.User": {
-            "type": "object",
-            "properties": {
-                "createdBy": {
-                    "type": "string"
-                },
-                "createdOn": {
-                    "type": "string"
-                },
-                "deletedBy": {
-                    "type": "string"
-                },
-                "deletedOn": {
-                    "type": "string"
-                },
-                "deviceInfo": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "email": {
-                    "type": "string"
-                },
-                "firstname": {
-                    "type": "string"
-                },
-                "id": {
-                    "description": "Props",
-                    "type": "string"
-                },
-                "ipaddress": {
-                    "type": "string"
-                },
-                "isActive": {
-                    "type": "boolean"
-                },
-                "isEmailValidated": {
-                    "type": "boolean"
-                },
-                "lastModifiedBy": {
-                    "type": "string"
-                },
-                "lastModifiedOn": {
-                    "type": "string"
-                },
-                "lastname": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "phoneNumber": {
-                    "type": "string"
-                },
-                "profilePictureUrl": {
-                    "type": "string"
-                },
-                "refreshTokenExp": {
-                    "type": "string"
-                },
-                "refreshTokenHash": {
-                    "description": "Session properties",
-                    "type": "string"
-                },
-                "userAgent": {
-                    "type": "string"
-                },
-                "userRoles": {
-                    "description": "Relations",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.UserRole"
-                    }
-                }
-            }
-        },
-        "entities.UserRole": {
-            "type": "object",
-            "properties": {
-                "createdBy": {
-                    "type": "string"
-                },
-                "createdOn": {
-                    "type": "string"
-                },
-                "deletedBy": {
-                    "type": "string"
-                },
-                "deletedOn": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "isActive": {
-                    "type": "boolean"
-                },
-                "lastModifiedBy": {
-                    "type": "string"
-                },
-                "lastModifiedOn": {
-                    "type": "string"
-                },
-                "role": {
-                    "$ref": "#/definitions/entities.Role"
-                },
-                "roleID": {
-                    "type": "string"
-                },
-                "user": {
-                    "description": "Relations",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/entities.User"
-                        }
-                    ]
-                },
-                "userID": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.CreateRoleRequest": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 2
-                }
-            }
-        },
-        "handler.CreateUserRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "firstname",
-                "is_email_validated",
-                "lastname",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "firstname": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 2
-                },
-                "is_email_validated": {
-                    "type": "boolean"
-                },
-                "lastname": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 2
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
-                }
-            }
-        },
-        "handler.CreateUserRoleRequest": {
-            "type": "object",
-            "required": [
-                "role_id"
-            ],
-            "properties": {
-                "role_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.ForgotPasswordRequest": {
+        "dtos.ForgotPasswordRequest": {
             "type": "object",
             "required": [
                 "email"
@@ -1298,7 +662,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.LoginRequest": {
+        "dtos.LoginRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -1314,7 +678,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.LogoutRequest": {
+        "dtos.LogoutRequest": {
             "type": "object",
             "required": [
                 "refresh_token"
@@ -1325,7 +689,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.RefreshRequest": {
+        "dtos.RefreshTokenRequest": {
             "type": "object",
             "required": [
                 "refresh_token"
@@ -1336,7 +700,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.ResetPasswordRequest": {
+        "dtos.ResetPasswordRequest": {
             "type": "object",
             "required": [
                 "new_password",
@@ -1352,7 +716,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.SignupRequest": {
+        "dtos.SignupRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -1366,10 +730,12 @@ const docTemplate = `{
                 },
                 "firstname": {
                     "type": "string",
+                    "maxLength": 100,
                     "minLength": 2
                 },
                 "lastname": {
                     "type": "string",
+                    "maxLength": 100,
                     "minLength": 2
                 },
                 "password": {
@@ -1377,35 +743,180 @@ const docTemplate = `{
                     "minLength": 8
                 },
                 "phone_number": {
-                    "description": "E.164 format: +[country_code][number]",
                     "type": "string"
                 }
             }
         },
-        "handler.UpdateRoleRequest": {
+        "dtos.UserCreateRequest": {
             "type": "object",
             "required": [
-                "name"
+                "email",
+                "firstname",
+                "lastname",
+                "password"
             ],
             "properties": {
-                "name": {
+                "email": {
+                    "type": "string"
+                },
+                "firstname": {
                     "type": "string",
                     "maxLength": 100,
                     "minLength": 2
+                },
+                "lastname": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "phone_number": {
+                    "type": "string"
                 }
             }
         },
-        "handler.UpdateUserRoleRequest": {
+        "dtos.UserResponse": {
             "type": "object",
-            "required": [
-                "role_id",
-                "user_id"
-            ],
             "properties": {
-                "role_id": {
+                "birthdate": {
                     "type": "string"
                 },
-                "user_id": {
+                "city_id": {
+                    "type": "integer"
+                },
+                "created_on": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "is_email_validated": {
+                    "type": "boolean"
+                },
+                "last_modified_on": {
+                    "type": "string"
+                },
+                "lastname": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "profile_picture": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.UserUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
+                },
+                "lastname": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.MessageEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/response.MessageBody"
+                },
+                "error": {
+                    "$ref": "#/definitions/response.ErrorBody"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "handler.UserEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dtos.UserResponse"
+                },
+                "error": {
+                    "$ref": "#/definitions/response.ErrorBody"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "handler.UserListEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.UserResponse"
+                    }
+                },
+                "error": {
+                    "$ref": "#/definitions/response.ErrorBody"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "response.ErrorBody": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "details": {},
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.MessageBody": {
+            "type": "object",
+            "properties": {
+                "message": {
                     "type": "string"
                 }
             }
@@ -1414,29 +925,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {},
-                "error_code": {
-                    "type": "string"
-                },
-                "errors": {},
-                "message": {
-                    "type": "string"
+                "error": {
+                    "$ref": "#/definitions/response.ErrorBody"
                 },
                 "success": {
                     "type": "boolean"
-                }
-            }
-        },
-        "services.TokenPair": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "expires_at": {
-                    "type": "string"
-                },
-                "refresh_token": {
-                    "type": "string"
                 }
             }
         }
@@ -1453,6 +946,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "Bu API'nin açıklaması",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

@@ -1,160 +1,13 @@
 basePath: /api/v1
 definitions:
-  entities.Role:
-    properties:
-      createdBy:
-        type: string
-      createdOn:
-        type: string
-      deletedBy:
-        type: string
-      deletedOn:
-        type: string
-      id:
-        type: string
-      isActive:
-        type: boolean
-      lastModifiedBy:
-        type: string
-      lastModifiedOn:
-        type: string
-      name:
-        type: string
-      userRoles:
-        description: Relations
-        items:
-          $ref: '#/definitions/entities.UserRole'
-        type: array
-    type: object
-  entities.User:
-    properties:
-      createdBy:
-        type: string
-      createdOn:
-        type: string
-      deletedBy:
-        type: string
-      deletedOn:
-        type: string
-      deviceInfo:
-        items:
-          type: integer
-        type: array
-      email:
-        type: string
-      firstname:
-        type: string
-      id:
-        description: Props
-        type: string
-      ipaddress:
-        type: string
-      isActive:
-        type: boolean
-      isEmailValidated:
-        type: boolean
-      lastModifiedBy:
-        type: string
-      lastModifiedOn:
-        type: string
-      lastname:
-        type: string
-      password:
-        type: string
-      phoneNumber:
-        type: string
-      profilePictureUrl:
-        type: string
-      refreshTokenExp:
-        type: string
-      refreshTokenHash:
-        description: Session properties
-        type: string
-      userAgent:
-        type: string
-      userRoles:
-        description: Relations
-        items:
-          $ref: '#/definitions/entities.UserRole'
-        type: array
-    type: object
-  entities.UserRole:
-    properties:
-      createdBy:
-        type: string
-      createdOn:
-        type: string
-      deletedBy:
-        type: string
-      deletedOn:
-        type: string
-      id:
-        type: string
-      isActive:
-        type: boolean
-      lastModifiedBy:
-        type: string
-      lastModifiedOn:
-        type: string
-      role:
-        $ref: '#/definitions/entities.Role'
-      roleID:
-        type: string
-      user:
-        allOf:
-        - $ref: '#/definitions/entities.User'
-        description: Relations
-      userID:
-        type: string
-    type: object
-  handler.CreateRoleRequest:
-    properties:
-      name:
-        maxLength: 100
-        minLength: 2
-        type: string
-    required:
-    - name
-    type: object
-  handler.CreateUserRequest:
-    properties:
-      email:
-        type: string
-      firstname:
-        maxLength: 100
-        minLength: 2
-        type: string
-      is_email_validated:
-        type: boolean
-      lastname:
-        maxLength: 100
-        minLength: 2
-        type: string
-      password:
-        minLength: 6
-        type: string
-    required:
-    - email
-    - firstname
-    - is_email_validated
-    - lastname
-    - password
-    type: object
-  handler.CreateUserRoleRequest:
-    properties:
-      role_id:
-        type: string
-    required:
-    - role_id
-    type: object
-  handler.ForgotPasswordRequest:
+  dtos.ForgotPasswordRequest:
     properties:
       email:
         type: string
     required:
     - email
     type: object
-  handler.LoginRequest:
+  dtos.LoginRequest:
     properties:
       email:
         type: string
@@ -165,21 +18,21 @@ definitions:
     - email
     - password
     type: object
-  handler.LogoutRequest:
+  dtos.LogoutRequest:
     properties:
       refresh_token:
         type: string
     required:
     - refresh_token
     type: object
-  handler.RefreshRequest:
+  dtos.RefreshTokenRequest:
     properties:
       refresh_token:
         type: string
     required:
     - refresh_token
     type: object
-  handler.ResetPasswordRequest:
+  dtos.ResetPasswordRequest:
     properties:
       new_password:
         minLength: 6
@@ -190,21 +43,22 @@ definitions:
     - new_password
     - token
     type: object
-  handler.SignupRequest:
+  dtos.SignupRequest:
     properties:
       email:
         type: string
       firstname:
+        maxLength: 100
         minLength: 2
         type: string
       lastname:
+        maxLength: 100
         minLength: 2
         type: string
       password:
         minLength: 8
         type: string
       phone_number:
-        description: 'E.164 format: +[country_code][number]'
         type: string
     required:
     - email
@@ -212,44 +66,131 @@ definitions:
     - lastname
     - password
     type: object
-  handler.UpdateRoleRequest:
+  dtos.UserCreateRequest:
     properties:
-      name:
+      email:
+        type: string
+      firstname:
         maxLength: 100
         minLength: 2
         type: string
+      lastname:
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone_number:
+        type: string
     required:
-    - name
+    - email
+    - firstname
+    - lastname
+    - password
     type: object
-  handler.UpdateUserRoleRequest:
+  dtos.UserResponse:
     properties:
-      role_id:
+      birthdate:
         type: string
-      user_id:
+      city_id:
+        type: integer
+      created_on:
         type: string
-    required:
-    - role_id
-    - user_id
+      email:
+        type: string
+      firstname:
+        type: string
+      gender:
+        type: integer
+      id:
+        type: string
+      is_active:
+        type: boolean
+      is_email_validated:
+        type: boolean
+      last_modified_on:
+        type: string
+      lastname:
+        type: string
+      phone_number:
+        type: string
+      profile_picture:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
+  dtos.UserUpdateRequest:
+    properties:
+      email:
+        type: string
+      firstname:
+        maxLength: 100
+        minLength: 2
+        type: string
+      lastname:
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone_number:
+        type: string
+    type: object
+  handler.MessageEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/response.MessageBody'
+      error:
+        $ref: '#/definitions/response.ErrorBody'
+      success:
+        type: boolean
+    type: object
+  handler.UserEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/dtos.UserResponse'
+      error:
+        $ref: '#/definitions/response.ErrorBody'
+      success:
+        type: boolean
+    type: object
+  handler.UserListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dtos.UserResponse'
+        type: array
+      error:
+        $ref: '#/definitions/response.ErrorBody'
+      success:
+        type: boolean
+    type: object
+  response.ErrorBody:
+    properties:
+      code:
+        type: string
+      details: {}
+      message:
+        type: string
+    type: object
+  response.MessageBody:
+    properties:
+      message:
+        type: string
     type: object
   response.Response:
     properties:
       data: {}
-      error_code:
-        type: string
-      errors: {}
-      message:
-        type: string
+      error:
+        $ref: '#/definitions/response.ErrorBody'
       success:
         type: boolean
-    type: object
-  services.TokenPair:
-    properties:
-      access_token:
-        type: string
-      expires_at:
-        type: string
-      refresh_token:
-        type: string
     type: object
 host: localhost:8080
 info:
@@ -276,18 +217,20 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.ForgotPasswordRequest'
+          $ref: '#/definitions/dtos.ForgotPasswordRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Success message
+          description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handler.MessageEnvelope'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
       summary: Request password reset
@@ -297,27 +240,32 @@ paths:
     post:
       consumes:
       - application/json
-      description: Login with email and password, returns access and refresh tokens
+      description: Login with email and password, sets session cookies, and returns
+        a success message
       parameters:
       - description: Login Request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.LoginRequest'
+          $ref: '#/definitions/dtos.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Token Pair
+          description: OK
           schema:
-            $ref: '#/definitions/services.TokenPair'
+            $ref: '#/definitions/handler.MessageEnvelope'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/response.Response'
         "401":
           description: Invalid credentials
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
       summary: User login
@@ -334,18 +282,20 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.LogoutRequest'
+          $ref: '#/definitions/dtos.LogoutRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Success message
+          description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handler.MessageEnvelope'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
       summary: User logout
@@ -355,20 +305,27 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get the currently authenticated user's information
+      description: Get the currently authenticated user's information using the session
+        cookie
       produces:
       - application/json
       responses:
         "200":
-          description: Current User
+          description: OK
           schema:
-            $ref: '#/definitions/entities.User'
+            $ref: '#/definitions/handler.UserEnvelope'
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/response.Response'
-      security:
-      - BearerAuth: []
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
       summary: Get current user
       tags:
       - auth
@@ -376,27 +333,32 @@ paths:
     post:
       consumes:
       - application/json
-      description: Get new access and refresh tokens using a valid refresh token
+      description: Rotate session cookies using a valid refresh token and return a
+        success message
       parameters:
       - description: Refresh Request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.RefreshRequest'
+          $ref: '#/definitions/dtos.RefreshTokenRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: New Token Pair
+          description: OK
           schema:
-            $ref: '#/definitions/services.TokenPair'
+            $ref: '#/definitions/handler.MessageEnvelope'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/response.Response'
         "401":
           description: Invalid refresh token
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
       summary: Refresh tokens
@@ -413,22 +375,24 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.ResetPasswordRequest'
+          $ref: '#/definitions/dtos.ResetPasswordRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Success message
+          description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handler.MessageEnvelope'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/response.Response'
         "401":
           description: Invalid or expired token
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
       summary: Reset password
@@ -438,22 +402,22 @@ paths:
     post:
       consumes:
       - application/json
-      description: Register a new user with email and password, returns access and
-        refresh tokens
+      description: Register a new user with email and password, sets session cookies,
+        and returns a success message
       parameters:
       - description: Signup Request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.SignupRequest'
+          $ref: '#/definitions/dtos.SignupRequest'
       produces:
       - application/json
       responses:
         "201":
-          description: Token Pair
+          description: Created
           schema:
-            $ref: '#/definitions/services.TokenPair'
+            $ref: '#/definitions/handler.MessageEnvelope'
         "400":
           description: Bad Request
           schema:
@@ -462,344 +426,13 @@ paths:
           description: Email already exists
           schema:
             $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
       summary: User signup
       tags:
       - auth
-  /roles:
-    get:
-      parameters:
-      - default: 10
-        description: Limit
-        in: query
-        name: limit
-        type: integer
-      - default: 0
-        description: Offset
-        in: query
-        name: offset
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/entities.Role'
-            type: array
-      summary: List all roles
-      tags:
-      - roles
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Role data
-        in: body
-        name: role
-        required: true
-        schema:
-          $ref: '#/definitions/handler.CreateRoleRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/entities.Role'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Create a new role
-      tags:
-      - roles
-  /roles/{id}:
-    delete:
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Delete role
-      tags:
-      - roles
-    get:
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entities.Role'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get role by ID
-      tags:
-      - roles
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Role data
-        in: body
-        name: role
-        required: true
-        schema:
-          $ref: '#/definitions/handler.UpdateRoleRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entities.Role'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Update role
-      tags:
-      - roles
-  /user-roles:
-    get:
-      parameters:
-      - default: 10
-        description: Limit
-        in: query
-        name: limit
-        type: integer
-      - default: 0
-        description: Offset
-        in: query
-        name: offset
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/entities.UserRole'
-            type: array
-      summary: List all user roles
-      tags:
-      - user-roles
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: UserRole data
-        in: body
-        name: userRole
-        required: true
-        schema:
-          $ref: '#/definitions/handler.CreateUserRoleRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/entities.UserRole'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Create a new user role assignment
-      tags:
-      - user-roles
-  /user-roles/{id}:
-    delete:
-      parameters:
-      - description: UserRole ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Delete user role
-      tags:
-      - user-roles
-    get:
-      parameters:
-      - description: UserRole ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entities.UserRole'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get user role by ID
-      tags:
-      - user-roles
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: UserRole ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: UserRole data
-        in: body
-        name: userRole
-        required: true
-        schema:
-          $ref: '#/definitions/handler.UpdateUserRoleRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entities.UserRole'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Update user role
-      tags:
-      - user-roles
-  /user-roles/me:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/entities.UserRole'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get current user's roles
-      tags:
-      - user-roles
-  /user-roles/role/{roleId}:
-    get:
-      parameters:
-      - description: Role ID
-        in: path
-        name: roleId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/entities.UserRole'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get user roles by role ID
-      tags:
-      - user-roles
   /users:
     get:
       consumes:
@@ -820,9 +453,11 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/entities.User'
-            type: array
+            $ref: '#/definitions/handler.UserListEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -840,16 +475,24 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.CreateUserRequest'
+          $ref: '#/definitions/dtos.UserCreateRequest'
       produces:
       - application/json
       responses:
         "201":
-          description: Created User
+          description: Created
           schema:
-            $ref: '#/definitions/entities.User'
+            $ref: '#/definitions/handler.UserEnvelope'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: User already exists
           schema:
             $ref: '#/definitions/response.Response'
         "500":
@@ -873,14 +516,20 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: Success message
+        "204":
+          description: No Content
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            type: string
         "400":
           description: Invalid ID
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: User not found
           schema:
             $ref: '#/definitions/response.Response'
         "500":
@@ -906,13 +555,21 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entities.User'
+            $ref: '#/definitions/handler.UserEnvelope'
         "400":
           description: Invalid ID
           schema:
             $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
         "404":
           description: User not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
       summary: Get a user by ID
@@ -933,16 +590,28 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.CreateUserRequest'
+          $ref: '#/definitions/dtos.UserUpdateRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entities.User'
+            $ref: '#/definitions/handler.UserEnvelope'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: User already exists
           schema:
             $ref: '#/definitions/response.Response'
         "500":
