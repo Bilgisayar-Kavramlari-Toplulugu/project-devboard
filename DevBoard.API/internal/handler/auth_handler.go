@@ -7,6 +7,7 @@ import (
 	"project-devboard/internal/dtos"
 	"project-devboard/internal/services"
 	"project-devboard/pkg/apperrors"
+	"project-devboard/pkg/common/cookies"
 	"project-devboard/pkg/response"
 	"project-devboard/pkg/validator"
 
@@ -52,8 +53,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-
-	setAuthCookies(c, h.cfg, tokenPair)
+	//cookie burada set ediliyor 
+	cookies.SetAuthCookies(c, h.cfg, tokenPair)
 	response.Message(c, http.StatusOK, "Logged in successfully")
 }
 
@@ -88,7 +89,7 @@ func (h *AuthHandler) Signup(c *gin.Context) {
 		return
 	}
 
-	setAuthCookies(c, h.cfg, tokenPair)
+	cookies.SetAuthCookies(c, h.cfg, tokenPair)
 	response.Message(c, http.StatusCreated, "Signed up successfully")
 }
 
@@ -105,7 +106,7 @@ func (h *AuthHandler) Signup(c *gin.Context) {
 // @Failure      500      {object}  response.Response  "Internal Server Error"
 // @Router       /auth/refresh [post]
 func (h *AuthHandler) Refresh(c *gin.Context) {
-	refreshToken := readRefreshToken(c, h.cfg)
+	refreshToken := cookies.ReadRefreshToken(c, h.cfg)
 	if refreshToken == "" {
 		var req dtos.RefreshTokenRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -121,12 +122,12 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 
 	tokenPair, err := h.authService.Refresh(refreshToken)
 	if err != nil {
-		clearAuthCookies(c, h.cfg)
+		cookies.ClearAuthCookies(c, h.cfg)
 		c.Error(err)
 		return
 	}
 
-	setAuthCookies(c, h.cfg, tokenPair)
+	cookies.SetAuthCookies(c, h.cfg, tokenPair)
 	response.Message(c, http.StatusOK, "Session refreshed successfully")
 }
 
@@ -142,8 +143,8 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 // @Failure      500      {object}  response.Response  "Internal Server Error"
 // @Router       /auth/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {
-	refreshToken := readRefreshToken(c, h.cfg)
-	if refreshToken == "" && requestHasBody(c) {
+	refreshToken := cookies.ReadRefreshToken(c, h.cfg)
+	if refreshToken == "" && cookies.RequestHasBody(c) {
 		var req dtos.LogoutRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.Error(apperrors.New(apperrors.InvalidRequest, apperrors.ErrInvalidRequest))
@@ -163,7 +164,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		}
 	}
 
-	clearAuthCookies(c, h.cfg)
+	cookies.ClearAuthCookies(c, h.cfg)
 	response.Message(c, http.StatusOK, "Logged out successfully")
 }
 
