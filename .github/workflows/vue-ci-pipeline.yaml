@@ -1,7 +1,7 @@
 name: Vue CI Pipeline
 
 on:
-  push:
+  pull_request:
     branches: ["develop"]
     paths:
       - "DevBoard.WebUI/**"
@@ -50,7 +50,7 @@ jobs:
         run: npm ci --prefer-offline --no-audit
 
       - name: Run Tests
-        run: npm run test --if-present
+        run: npm run test:unit
 
   build:
     runs-on: ubuntu-latest
