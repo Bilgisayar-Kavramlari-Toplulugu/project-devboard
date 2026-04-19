@@ -1,0 +1,29 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./bin/api ./cmd/api/main.go"
+  bin = "./bin/api"
+  delay = 1000
+  exclude_dir = ["tmp", "bin", "docs", "pkg"]
+  include_dir = ["cmd", "internal"]
+  include_ext = ["go", "env"]
+  exclude_regex = ["_test\\.go$"]
+  stop_on_error = false
+  log = "build-errors.log"
+
+  [build.windows]
+    cmd = "go build -o ./bin/api.exe ./cmd/api/main.go"
+    bin = "bin\\api.exe"
+
+[log]
+  time = true
+
+[color]
+  main = "magenta"
+  watcher = "cyan"
+  build = "yellow"
+  runner = "green"
+
+[misc]
+  clean_on_exit = true
