@@ -1,68 +1,36 @@
-name: Vue CI Pipeline
+name: CI
 
 on:
   push:
-    branches: ["develop"]
-  pull_request:
-    branches: ["develop"]
+    branches:
+      - main
 
 jobs:
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
-
-      - name: Run Lint
-        run: npm run lint
-
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
-
-      - name: Run Tests
-        run: npm run test --if-present
-
-
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
         with:
-          node-version: 20
+          node-version: '14'
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: npm install
+        working-directory: ./DevBoard.WebUI
 
-      - name: Build Project
+      - name: Build
         run: npm run build
+        working-directory: ./DevBoard.WebUI
 
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
+      - name: Test
+        run: npm test
+        working-directory: ./DevBoard.WebUI
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
         with:
-          name: vue-dist
-          path: dist
+          name: build
+          path: ./DevBoard.WebUI/dist
