@@ -1,7 +1,7 @@
 name: Vue CI Pipeline
 
 on:
-  push:
+  pull_request:
     branches: ["develop"]
     paths:
       - "DevBoard.WebUI/**"
