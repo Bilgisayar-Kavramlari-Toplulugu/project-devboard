@@ -5,10 +5,7 @@ on:
     branches: ["develop"]
     paths:
       - "DevBoard.WebUI/**"
-  pull_request:
-    branches: ["develop"]
-    paths:
-      - "DevBoard.WebUI/**"
+
 
 jobs:
   lint:
