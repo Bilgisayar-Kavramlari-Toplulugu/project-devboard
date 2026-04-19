@@ -3,12 +3,8 @@ name: Vue CI Pipeline
 on:
   push:
     branches: ["develop"]
-    paths:
-      - "fe/**"
   pull_request:
     branches: ["develop"]
-    paths:
-      - "fe/**"
 
 jobs:
 
