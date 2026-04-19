@@ -1,36 +1,55 @@
-name: CI
+name: Vue CI Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: ["develop"]
+  pull_request:
+    branches: ["develop"]
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      # 1. Repo
+      - name: Repo
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      # 2. Node.js 20
+      - name: Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
+          cache: npm
 
-      - name: Install dependencies
-        run: npm install
-        working-directory: ./DevBoard.WebUI
+      # 2.1 (EK) Cache optimize
+      - name: Cache npm modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-      - name: Build
+      # 3. Dependencies
+      - name: Dependencies
+        run: npm ci
+
+      # 4. Linting
+      - name: Linting
+        run: npm run lint
+
+      # 5. Testing
+      - name: Testing
+        run: npm run test --if-present
+
+      # 6. Building
+      - name: Building
         run: npm run build
-        working-directory: ./DevBoard.WebUI
 
-      - name: Test
-        run: npm run test:unit
-        working-directory: ./DevBoard.WebUI
-
-      - name: Upload artifacts
+      # 6.1 (EK) Build artifact kaydetme
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build
-          path: ./DevBoard.WebUI/dist
+          name: vue-dist
+          path: dist
