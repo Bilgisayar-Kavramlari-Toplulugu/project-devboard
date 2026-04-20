@@ -88,12 +88,11 @@ func main() {
 	}))
 
 	routes.SetupRoutes(r, &routes.RouteConfig{
-		DB:                     db,
-		UserHandler:            userHandler,
-		AuthHandler:            authHandler,
-		JWTService:             jwtService,
-		AccessTokenCookieName:  cfg.AccessTokenCookieName,
-		RefreshTokenCookieName: cfg.RefreshTokenCookieName,
+		DB:          db,
+		UserHandler: userHandler,
+		AuthHandler: authHandler,
+		JWTService:  jwtService,
+		Config:      cfg,
 	})
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
