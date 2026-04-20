@@ -11,13 +11,13 @@ import (
 
 // RouteConfig - Tüm route'lar için gerekli bağımlılıklar NoRedis
 type RouteConfig struct {
-	DB               *gorm.DB
-	UserHandler      *handler.UserHandler
-	AuthHandler      *handler.AuthHandler
-	SkillTypeHandler *handler.SkillTypeHandler
+	DB                        *gorm.DB
+	UserHandler               *handler.UserHandler
+	AuthHandler               *handler.AuthHandler
+	SkillTypeHandler          *handler.SkillTypeHandler
 	DeveloperDashboardHandler *handler.DeveloperDashboardHandler
-	JWTService       services.JWTService
-	Config           *config.Config
+	JWTService                services.JWTService
+	Config                    *config.Config
 }
 
 // SetupRoutes - Tüm API route'larını yapılandırır

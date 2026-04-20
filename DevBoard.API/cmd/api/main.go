@@ -94,7 +94,7 @@ func main() {
 	}))
 
 	routes.SetupRoutes(r, &routes.RouteConfig{
-		DB:               db,
+		DB:                        db,
 		UserHandler:               userHandler,
 		AuthHandler:               authHandler,
 		JWTService:                jwtService,
