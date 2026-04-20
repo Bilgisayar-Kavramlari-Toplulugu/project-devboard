@@ -86,6 +86,7 @@ Yeni başlıyorsanız, bu işlerle başlayın:
 
 ### 1️⃣ Repository'yi Hazırlayın
 ```bash
+# (Repoya topluluk dışından katkı sunmak için. Ekip üyeleri direkt clone yapabilir.)
 # Repository'yi fork edin (GitHub'da "Fork" butonuna tıklayın)
 
 # Bilgisayarınıza klonlayın
