@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"project-devboard/internal/config"
 	"project-devboard/internal/handler"
 	"project-devboard/internal/services"
 
@@ -14,8 +15,8 @@ type RouteConfig struct {
 	UserHandler            *handler.UserHandler
 	AuthHandler            *handler.AuthHandler
 	JWTService             services.JWTService
-	AccessTokenCookieName  string
-	RefreshTokenCookieName string
+	Config                 *config.Config
+
 }
 
 // SetupRoutes - Tüm API route'larını yapılandırır
@@ -31,7 +32,7 @@ func SetupRoutes(r *gin.Engine, cfg *RouteConfig) {
 	)
 
 	// Auth route'larını yapılandır (public + protected)
-	SetupAuthRoutes(api, cfg.AuthHandler, cfg.JWTService, cfg.AccessTokenCookieName, cfg.RefreshTokenCookieName)
+	SetupAuthRoutes(api, cfg.AuthHandler, cfg.JWTService, cfg.Config)
 
-	SetupUserRoutes(api, cfg.UserHandler, cfg.JWTService, cfg.AccessTokenCookieName, cfg.RefreshTokenCookieName)
+	SetupUserRoutes(api, cfg.UserHandler, cfg.JWTService, cfg.Config)
 }

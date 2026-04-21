@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"project-devboard/internal/config"
 	"project-devboard/internal/handler"
 	"project-devboard/internal/middleware"
 	"project-devboard/internal/services"
@@ -9,7 +10,7 @@ import (
 )
 
 // SetupAuthRoutes - Auth route'larını yapılandır
-func SetupAuthRoutes(r *gin.RouterGroup, authHandler *handler.AuthHandler, jwtService services.JWTService, accessTokenCookieName, refreshTokenCookieName string) {
+func SetupAuthRoutes(r *gin.RouterGroup, authHandler *handler.AuthHandler, jwtService services.JWTService, config *config.Config) {
 	// Public auth endpoints (no authentication required)
 	auth := r.Group("/auth")
 	{
@@ -23,7 +24,7 @@ func SetupAuthRoutes(r *gin.RouterGroup, authHandler *handler.AuthHandler, jwtSe
 
 	// Protected auth endpoints (authentication required)
 	authProtected := r.Group("/auth")
-	authProtected.Use(middleware.JWTMiddleware(jwtService, accessTokenCookieName))
+	authProtected.Use(middleware.JWTMiddleware(jwtService, config.AccessTokenCookieName))
 	{
 		authProtected.GET("/me", authHandler.GetMe)
 	}
