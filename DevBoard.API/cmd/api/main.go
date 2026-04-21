@@ -54,12 +54,13 @@ func main() {
 
 	// Repositories
 	userRepo := repository.NewUserRepository(db)
+	skillTypeRepo := repository.NewSkillTypeRepository(db)
 
 	// Services
 	jwtService := services.NewJWTService(cfg, db)
 	authService := services.NewAuthService(db, userRepo, jwtService, cfg)
 	userService := services.NewUserService(userRepo)
-	skillTypeService := services.NewSkillTypeService(repository.NewSkillTypeRepository(db))
+	skillTypeService := services.NewSkillTypeService(skillTypeRepo)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService, v, cfg)
