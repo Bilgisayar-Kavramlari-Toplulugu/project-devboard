@@ -43,11 +43,15 @@
                     <span v-if="loginErr.password" class="field-error">{{ loginErr.password }}</span>
                   </div>
 
-                  <!-- Spacer: signup'taki Confirm Password alanıyla piksel eşitliği -->
-                  <div class="field field-spacer" aria-hidden="true">
-                    <label class="label">&nbsp;</label>
-                    <div class="input-wrap">
-                      <input class="input" tabindex="-1" disabled placeholder=" " />
+                  <!-- Forgot password + spacer satırı -->
+                  <div class="field field-spacer-row" aria-hidden="mode !== 'login'">
+                    <div class="forgot-row">
+                      <button
+                        type="button"
+                        class="forgot-link"
+                        :tabindex="mode === 'login' ? 0 : -1"
+                        @click="openForgot"
+                      >Forgot password?</button>
                     </div>
                   </div>
 
@@ -153,7 +157,7 @@ const props = defineProps({
   modelValue: { type: Boolean, default: false },
   initialMode: { type: String, default: 'login' }
 })
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'open-forgot'])
 
 const mode = ref(props.initialMode)
 const showConfirm = ref(false)
@@ -172,6 +176,11 @@ function switchTo(target) {
 
 function close() {
   emit('update:modelValue', false)
+}
+
+function openForgot() {
+  close()
+  emit('open-forgot')
 }
 
 function onKeydown(e) {
@@ -432,6 +441,36 @@ async function handleSignup() {
   transition: color 0.2s;
 }
 .switch-link:hover { color: #c084fc; }
+
+/* ── FORGOT ── */
+.field-spacer-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  /* signup'taki confirm password alanıyla yaklaşık yükseklik eşitliği */
+  min-height: 62px;
+  justify-content: flex-end;
+}
+
+.forgot-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.forgot-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: #a855f7;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.forgot-link:hover { color: #c084fc; }
 
 /* ── OVERLAY FADE ── */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.22s ease; }
