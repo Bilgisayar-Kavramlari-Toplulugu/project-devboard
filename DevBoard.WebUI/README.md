@@ -25,6 +25,39 @@ See [Vite Configuration Reference](https://vite.dev/config/).
 npm install
 ```
 
+## Docker Setup
+
+### Build Locally
+
+```sh
+docker build -t devboard-frontend:0.0.1 .
+```
+
+### Run Locally
+
+```sh
+docker run --rm -p 5173:5173 devboard-frontend:0.0.1
+```
+
+Then open: [http://localhost:5173](http://localhost:5173)
+
+### Custom Port
+
+To run on a different port (e.g., 8080):
+
+```sh
+docker run --rm -e PORT=8080 -p 8080:8080 devboard-frontend:0.0.1
+```
+
+### Security Features
+
+The Docker image includes:
+- **Multi-stage build**: Removes build dependencies from final image, reducing image size and attack surface
+- **Non-root user**: Application runs as `nodejs` user (UID 1001), not root
+- **Pinned versions**: Node 20.20.2-alpine for consistent, secure builds
+- **Optimized install**: Uses `npm ci` instead of `npm install` for reliable, reproducible installs
+- **.dockerignore**: Excludes unnecessary files (node_modules, git, tests, etc.) from build context
+
 ### Compile and Hot-Reload for Development
 
 ```sh
