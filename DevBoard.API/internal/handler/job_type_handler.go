@@ -56,7 +56,7 @@ func (h *JobTypeHandler) Create(c *gin.Context) {
 // @Description Get a list of all job types
 // @Tags JobTypes
 // @Produce json
-// @Success 200 {object} response.Response{data=[]entities.JobType}
+// @Success 200 {object} response.Response{data=[]dtos.JobTypeResponse}
 // @Router /job-types [get]
 func (h *JobTypeHandler) GetAll(c *gin.Context) {
 	jobTypes, err := h.service.GetAllJobTypes()
@@ -64,7 +64,11 @@ func (h *JobTypeHandler) GetAll(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	response.Success(c, http.StatusOK, jobTypes)
+	result := make([]dtos.JobTypeResponse, len(jobTypes))
+	for i, jt := range jobTypes {
+		result[i] = dtos.JobTypeResponse{Id: jt.Id, Name: jt.Name}
+	}
+	response.Success(c, http.StatusOK, result)
 }
 
 // @Summary Get a job type by ID
@@ -72,7 +76,7 @@ func (h *JobTypeHandler) GetAll(c *gin.Context) {
 // @Tags JobTypes
 // @Produce json
 // @Param id path int true "Job Type ID"
-// @Success 200 {object} response.Response{data=entities.JobType}
+// @Success 200 {object} response.Response{data=dtos.JobTypeResponse}
 // @Failure 404 {object} response.Response
 // @Router /job-types/{id} [get]
 func (h *JobTypeHandler) GetById(c *gin.Context) {
@@ -87,7 +91,7 @@ func (h *JobTypeHandler) GetById(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	response.Success(c, http.StatusOK, jobType)
+	response.Success(c, http.StatusOK, dtos.JobTypeResponse{Id: jobType.Id, Name: jobType.Name})
 }
 
 // @Summary Update a job type
