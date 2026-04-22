@@ -16,7 +16,7 @@
             <div class="track" :class="{ 'show-signup': mode === 'signup' }">
 
               <!-- LOG IN -->
-              <div class="panel" aria-hidden="mode !== 'login'">
+              <div class="panel" :aria-hidden="mode !== 'login'">
                 <div class="panel-head">
                   <h2 class="dialog-title">Welcome back</h2>
                   <p class="dialog-sub">Log in to your account</p>
@@ -44,7 +44,7 @@
                   </div>
 
                   <!-- Forgot password + spacer satırı -->
-                  <div class="field field-spacer-row" aria-hidden="mode !== 'login'">
+                  <div class="field field-spacer-row" :aria-hidden="mode !== 'login'">
                     <div class="forgot-row">
                       <button
                         type="button"
@@ -68,7 +68,7 @@
               </div>
 
               <!-- SIGN UP -->
-              <div class="panel" aria-hidden="mode !== 'signup'">
+              <div class="panel" :aria-hidden="mode !== 'signup'">
                 <div class="panel-head">
                   <h2 class="dialog-title">Create account</h2>
                   <p class="dialog-sub">Join 20k+ developers on DevBoard</p>
@@ -144,7 +144,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onUnmounted } from 'vue'
 
 const EmailIcon = {
   template: `<svg class="input-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>`
@@ -186,6 +186,8 @@ function openForgot() {
 function onKeydown(e) {
   if (e.key === 'Escape') close()
 }
+
+onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 
 watch(() => props.modelValue, (val) => {
   if (val) {

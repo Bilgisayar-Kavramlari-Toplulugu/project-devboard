@@ -142,7 +142,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const props = defineProps({
@@ -199,6 +199,8 @@ function openForgot() {
 function onKeydown(e) {
   if (e.key === 'Escape') close()
 }
+
+onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 
 watch(() => props.modelValue, (val) => {
   if (val) {

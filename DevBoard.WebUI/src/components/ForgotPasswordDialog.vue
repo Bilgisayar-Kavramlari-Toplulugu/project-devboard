@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false }
@@ -135,6 +135,8 @@ watch(() => props.modelValue, (val) => {
 function onKeydown(e) {
   if (e.key === 'Escape') close()
 }
+
+onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 
 function validate() {
   emailError.value = ''
