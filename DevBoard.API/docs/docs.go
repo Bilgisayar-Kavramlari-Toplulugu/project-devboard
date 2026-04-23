@@ -365,6 +365,237 @@ const docTemplate = `{
                 }
             }
         },
+        "/job-types": {
+            "get": {
+                "description": "Get a list of all job types",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "JobTypes"
+                ],
+                "summary": "Get all job types",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entities.JobType"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new job type with the given name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "JobTypes"
+                ],
+                "summary": "Create a new job type",
+                "parameters": [
+                    {
+                        "description": "Job type details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.JobTypeCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dtos.JobTypeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/job-types/{id}": {
+            "get": {
+                "description": "Get details of a job type by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "JobTypes"
+                ],
+                "summary": "Get a job type by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Job Type ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entities.JobType"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update an existing job type's name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "JobTypes"
+                ],
+                "summary": "Update a job type",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Job Type ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.JobTypeUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dtos.JobTypeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a job type by its ID",
+                "tags": [
+                    "JobTypes"
+                ],
+                "summary": "Delete a job type",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Job Type ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Get a list of users with pagination",
@@ -662,6 +893,43 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.JobTypeCreateRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "minLength": 2
+                }
+            }
+        },
+        "dtos.JobTypeResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.JobTypeUpdateRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "minLength": 2
+                }
+            }
+        },
         "dtos.LoginRequest": {
             "type": "object",
             "required": [
@@ -853,6 +1121,1594 @@ const docTemplate = `{
                 },
                 "phone_number": {
                     "type": "string"
+                }
+            }
+        },
+        "entities.Certificate": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "degree": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "expireDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "issueDate": {
+                    "type": "string"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.City": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "country": {
+                    "$ref": "#/definitions/entities.Country"
+                },
+                "countryId": {
+                    "type": "integer"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "displayOrder": {
+                    "type": "integer"
+                },
+                "educations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Education"
+                    }
+                },
+                "experiences": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Experience"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.User"
+                    }
+                }
+            }
+        },
+        "entities.Country": {
+            "type": "object",
+            "properties": {
+                "cities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.City"
+                    }
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "flagCode": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phonePrefix": {
+                    "type": "string"
+                },
+                "shortCode": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Education": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "$ref": "#/definitions/entities.City"
+                },
+                "cityId": {
+                    "type": "integer"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "gdpr": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Experience": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "$ref": "#/definitions/entities.City"
+                },
+                "cityId": {
+                    "type": "integer"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "enddate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "information": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "startdate": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.JobType": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "userJobTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UserJobType"
+                    }
+                }
+            }
+        },
+        "entities.Message": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "isHtml": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "receiver": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "receiverId": {
+                    "type": "string"
+                },
+                "sender": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "senderId": {
+                    "type": "string"
+                },
+                "subject": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/entities.MessageTemplateType"
+                },
+                "typeId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entities.MessageTemplate": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "integer"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "isHtml": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "subject": {
+                    "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/entities.MessageTemplateType"
+                },
+                "typeId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entities.MessageTemplateType": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "messageTemplates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.MessageTemplate"
+                    }
+                },
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Message"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.ProfessionalPlatform": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "professionalProfiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.ProfessionalProfile"
+                    }
+                }
+            }
+        },
+        "entities.ProfessionalProfile": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "platform": {
+                    "$ref": "#/definitions/entities.ProfessionalPlatform"
+                },
+                "platformId": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Project": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ownerProjectRole": {
+                    "type": "integer"
+                },
+                "ownerRole": {
+                    "$ref": "#/definitions/entities.ProjectRole"
+                },
+                "projectDevelopers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.ProjectDeveloper"
+                    }
+                },
+                "projectEndorsementables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.ProjectEndorsementable"
+                    }
+                },
+                "savedProjects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.SavedProject"
+                    }
+                },
+                "shortDescription": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/entities.ProjectType"
+                },
+                "typeId": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "userProjectSkills": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UserProjectSkill"
+                    }
+                }
+            }
+        },
+        "entities.ProjectDeveloper": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "developer": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "developerId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "project": {
+                    "$ref": "#/definitions/entities.Project"
+                },
+                "projectId": {
+                    "type": "integer"
+                },
+                "projectRole": {
+                    "$ref": "#/definitions/entities.ProjectRole"
+                },
+                "projectRoleId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entities.ProjectEndorsement": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "endorsementable": {
+                    "$ref": "#/definitions/entities.ProjectEndorsementable"
+                },
+                "endorsementableId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "sender": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "senderId": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.ProjectEndorsementable": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "project": {
+                    "$ref": "#/definitions/entities.Project"
+                },
+                "projectEndorsements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.ProjectEndorsement"
+                    }
+                },
+                "projectId": {
+                    "type": "integer"
+                },
+                "skillId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entities.ProjectRole": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projectDevelopers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.ProjectDeveloper"
+                    }
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Project"
+                    }
+                }
+            }
+        },
+        "entities.ProjectType": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Project"
+                    }
+                }
+            }
+        },
+        "entities.PublicEndorsement": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "senderUser": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "senderUserId": {
+                    "type": "string"
+                },
+                "userSkill": {
+                    "$ref": "#/definitions/entities.UserSkill"
+                },
+                "userSkillId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entities.Reference": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "emailAddress": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "lastname": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Role": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "userRoles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UserRole"
+                    }
+                }
+            }
+        },
+        "entities.SavedDeveloper": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "developer": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "developerId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.SavedFilter": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "filterData": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "ownerId": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.SavedProject": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "project": {
+                    "$ref": "#/definitions/entities.Project"
+                },
+                "projectId": {
+                    "type": "integer"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Skill": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projectEndorsementables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.ProjectEndorsementable"
+                    }
+                },
+                "skillType": {
+                    "$ref": "#/definitions/entities.SkillType"
+                },
+                "skillTypeId": {
+                    "type": "integer"
+                },
+                "userSkills": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UserSkill"
+                    }
+                }
+            }
+        },
+        "entities.SkillType": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Skill"
+                    }
+                }
+            }
+        },
+        "entities.User": {
+            "type": "object",
+            "properties": {
+                "birthdate": {
+                    "type": "string"
+                },
+                "certificates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Certificate"
+                    }
+                },
+                "city": {
+                    "$ref": "#/definitions/entities.City"
+                },
+                "cityId": {
+                    "type": "integer"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "educations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Education"
+                    }
+                },
+                "email": {
+                    "type": "string"
+                },
+                "experiences": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Experience"
+                    }
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "isEmailValidated": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "lastname": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "professionalProfiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.ProfessionalProfile"
+                    }
+                },
+                "profilePicturePath": {
+                    "type": "string"
+                },
+                "projectDevelopers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.ProjectDeveloper"
+                    }
+                },
+                "projectEndorsementsSent": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.ProjectEndorsement"
+                    }
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Project"
+                    }
+                },
+                "publicEndorsementsSent": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.PublicEndorsement"
+                    }
+                },
+                "receivedMessages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Message"
+                    }
+                },
+                "references": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Reference"
+                    }
+                },
+                "savedDevelopersByDev": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.SavedDeveloper"
+                    }
+                },
+                "savedDevelopersByUser": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.SavedDeveloper"
+                    }
+                },
+                "savedFilters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.SavedFilter"
+                    }
+                },
+                "savedProjects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.SavedProject"
+                    }
+                },
+                "sentMessages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Message"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "userJobTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UserJobType"
+                    }
+                },
+                "userRoles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UserRole"
+                    }
+                },
+                "userSkills": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UserSkill"
+                    }
+                },
+                "userWorkLocationTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UserWorkLocationType"
+                    }
+                }
+            }
+        },
+        "entities.UserJobType": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "jobType": {
+                    "$ref": "#/definitions/entities.JobType"
+                },
+                "jobTypeId": {
+                    "type": "integer"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.UserProjectSkill": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "project": {
+                    "$ref": "#/definitions/entities.Project"
+                },
+                "projectId": {
+                    "type": "integer"
+                },
+                "userSkill": {
+                    "$ref": "#/definitions/entities.UserSkill"
+                },
+                "userSkillId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entities.UserRole": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/entities.Role"
+                },
+                "roleId": {
+                    "type": "integer"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.UserSkill": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "publicEndorsements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.PublicEndorsement"
+                    }
+                },
+                "skill": {
+                    "$ref": "#/definitions/entities.Skill"
+                },
+                "skillId": {
+                    "type": "integer"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "userProjectSkills": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UserProjectSkill"
+                    }
+                }
+            }
+        },
+        "entities.UserWorkLocationType": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "workLocationType": {
+                    "$ref": "#/definitions/entities.WorkLocationType"
+                },
+                "workLocationTypeId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entities.WorkLocationType": {
+            "type": "object",
+            "properties": {
+                "createdBy": {
+                    "type": "string"
+                },
+                "createdOn": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "deletedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "lastModifiedBy": {
+                    "type": "string"
+                },
+                "lastModifiedOn": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "userWorkLocationTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UserWorkLocationType"
+                    }
                 }
             }
         },

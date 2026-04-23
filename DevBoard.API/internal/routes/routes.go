@@ -15,6 +15,7 @@ type RouteConfig struct {
 	UserHandler      *handler.UserHandler
 	AuthHandler      *handler.AuthHandler
 	SkillTypeHandler *handler.SkillTypeHandler
+	JobTypeHandler   *handler.JobTypeHandler
 	JWTService       services.JWTService
 	Config           *config.Config
 }
@@ -37,4 +38,6 @@ func SetupRoutes(r *gin.Engine, cfg *RouteConfig) {
 	SetupUserRoutes(api, cfg.UserHandler, cfg.JWTService, cfg.Config)
 
 	SetupSkillTypeRoutes(api, cfg.SkillTypeHandler, cfg.JWTService, cfg.Config)
+
+	SetupJobTypeRoutes(api, cfg.JobTypeHandler, cfg.JWTService, cfg.Config)
 }
