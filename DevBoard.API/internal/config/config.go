@@ -47,10 +47,10 @@ func Load() *Config {
 		CookieSameSite:             getEnv("COOKIE_SAME_SITE", "None"),
 		CORSAllowedOrigins:         getEnvList("CORS_ALLOWED_ORIGINS", []string{"http://localhost", "http://127.0.0.1"}),
 		SMTPHost:                   getEnv("SMTP_HOST", ""),
-		SMTPPort:                   587,
+		SMTPPort:                   getEnvInt("SMTP_PORT", 587),
 		SMTPEmail:                  getEnv("SMTP_EMAIL", ""),
 		SMTPPassword:               getEnv("SMTP_PASSWORD", ""),
-		PasswordResetExpireMinutes: 60, // 1 hour
+		PasswordResetExpireMinutes: getEnvInt("PASSWORD_RESET_EXPIRE_MINUTES", 60),
 		PasswordResetBaseURL:       getEnv("PASSWORD_RESET_BASE_URL", ""),
 	}
 }
