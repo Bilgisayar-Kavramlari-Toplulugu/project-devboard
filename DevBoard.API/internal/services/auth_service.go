@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"log"
 	"time"
 
 	"project-devboard/internal/config"
@@ -213,6 +214,9 @@ func (s *authService) ForgotPassword(email string) error {
 		return apperrors.Wrap(apperrors.InternalError, apperrors.ErrInternalServer, err)
 	}
 	rawToken := hex.EncodeToString(tokenBytes)
+
+	// TODO: remove before production — test için token'ı logla
+	log.Printf("[DEV] Password reset token for testing: %s", rawToken)
 
 	hash := sha256.Sum256([]byte(rawToken))
 	tokenHash := hex.EncodeToString(hash[:])

@@ -21,4 +21,7 @@ var (
 	// User
 	ErrUserNotFound      = ErrorDef{Code: "USER_NOT_FOUND", Message: "User not found"}
 	ErrUserAlreadyExists = ErrorDef{Code: "USER_ALREADY_EXISTS", Message: "User already exists"}
+
+	// Generic
+	ErrAlreadyExists = ErrorDef{Code: "ALREADY_EXISTS", Message: "Resource already exists"}
 )
