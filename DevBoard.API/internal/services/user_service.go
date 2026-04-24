@@ -85,7 +85,7 @@ func (s *userService) ListUsers(limit, offset int) ([]entities.User, error) {
 	if limit > 100 {
 		limit = 100
 	}
-	return s.repo.List(limit, offset)
+	return s.repo.List(limit)
 }
 
 func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, req dtos.UserUpdateRequest, actorID uuid.UUID) (*entities.User, error) {

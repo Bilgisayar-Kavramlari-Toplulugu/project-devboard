@@ -14,7 +14,7 @@ type BaseEntity struct {
 	CreatedBy      uuid.UUID  `gorm:"type:uuid;not null"`
 	LastModifiedOn time.Time  `gorm:"not null;type:timestamp with time zone;default:now()"`
 	LastModifiedBy uuid.UUID  `gorm:"type:uuid;not null"`
-	DeletedOn      *time.Time `gorm:"type:timestamp with time zone"`
+	DeletedAt      gorm.DeletedAt `gorm:"index"`
 	DeletedBy      *uuid.UUID `gorm:"type:uuid"`
 }
 
@@ -32,7 +32,8 @@ func (b *BaseEntity) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-// Soft delete kontrolü
-func (b *BaseEntity) BeforeDelete(tx *gorm.DB) error {
-	return tx.Model(b).Update("DeletedOn", time.Now()).Error
-}
+// // Soft delete kontrolü
+// base içinde yapılacak 
+// func (b *BaseEntity) BeforeDelete(tx *gorm.DB) error {
+// 	return tx.Model(b).Update("DeletedOn", time.Now()).Error
+// }
