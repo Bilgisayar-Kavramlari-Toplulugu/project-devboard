@@ -36,5 +36,10 @@
 ### Requirements
 
 - List required tools here
+- [Git](https://git-scm.com/)
+- [Docker](https://www.docker.com/)
+- [PostgreSQL](https://www.postgresql.org)
+- [GO](https://go.dev/doc/install)
+- [Vue](https://vuejs.org/)
 
 ### Getting Started
