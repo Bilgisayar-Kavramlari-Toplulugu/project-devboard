@@ -11,13 +11,14 @@ import (
 
 // RouteConfig - Tüm route'lar için gerekli bağımlılıklar NoRedis
 type RouteConfig struct {
-	DB               *gorm.DB
-	UserHandler      *handler.UserHandler
-	AuthHandler      *handler.AuthHandler
-	SkillTypeHandler *handler.SkillTypeHandler
-	JobTypeHandler   *handler.JobTypeHandler
-	JWTService       services.JWTService
-	Config           *config.Config
+	DB                      *gorm.DB
+	UserHandler             *handler.UserHandler
+	AuthHandler             *handler.AuthHandler
+	SkillTypeHandler        *handler.SkillTypeHandler
+	JobTypeHandler          *handler.JobTypeHandler
+	WorkLocationTypeHandler *handler.WorkLocationTypeHandler
+	JWTService              services.JWTService
+	Config                  *config.Config
 }
 
 // SetupRoutes - Tüm API route'larını yapılandırır
@@ -40,4 +41,6 @@ func SetupRoutes(r *gin.Engine, cfg *RouteConfig) {
 	SetupSkillTypeRoutes(api, cfg.SkillTypeHandler, cfg.JWTService, cfg.Config)
 
 	SetupJobTypeRoutes(api, cfg.JobTypeHandler, cfg.JWTService, cfg.Config)
+
+	SetupWorkLocationTypeRoutes(api, cfg.WorkLocationTypeHandler, cfg.JWTService, cfg.Config)
 }
