@@ -59,7 +59,19 @@ func (h *JobTypeHandler) Create(c *gin.Context) {
 // @Success 200 {object} response.Response{data=[]dtos.JobTypeResponse}
 // @Router /job-types [get]
 func (h *JobTypeHandler) GetAll(c *gin.Context) {
-	jobTypes, err := h.service.GetAllJobTypes()
+	limit := 20
+	offset := 0
+	if l := c.Query("limit"); l != "" {
+		if v, err := strconv.Atoi(l); err == nil && v > 0 {
+			limit = v
+		}
+	}
+	if p := c.Query("page"); p != "" {
+		if v, err := strconv.Atoi(p); err == nil && v > 1 {
+			offset = (v - 1) * limit
+		}
+	}
+	jobTypes, err := h.service.GetAllJobTypes(limit, offset)
 	if err != nil {
 		c.Error(err)
 		return
@@ -151,5 +163,5 @@ func (h *JobTypeHandler) Delete(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	response.Success(c, http.StatusNoContent, nil)
+	c.Status(http.StatusNoContent)
 }

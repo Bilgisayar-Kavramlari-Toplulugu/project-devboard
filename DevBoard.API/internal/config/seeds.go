@@ -5,29 +5,41 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var SystemUserID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
 
 func SeedData(db *gorm.DB) {
 	seedJobTypes(db)
+	seedWorkLocationTypes(db)
 }
 
 func seedJobTypes(db *gorm.DB) {
 	jobTypes := []entities.JobType{
-		{Id: 1, Name: "Full-time", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
-		{Id: 2, Name: "Part-time", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
-		{Id: 3, Name: "Contract", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
-		{Id: 4, Name: "Temporary", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
-		{Id: 5, Name: "Internship", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
-		{Id: 6, Name: "Other", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
+		{Name: "Full-time", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
+		{Name: "Part-time", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
+		{Name: "Contract", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
+		{Name: "Temporary", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
+		{Name: "Internship", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
+		{Name: "Other", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
 	}
 
-	for _, jt := range jobTypes {
-		var count int64
-		db.Model(&entities.JobType{}).Where("id = ?", jt.Id).Count(&count)
-		if count == 0 {
-			db.Create(&jt)
-		}
+	db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "name"}},
+		DoNothing: true,
+	}).Create(&jobTypes)
+}
+
+func seedWorkLocationTypes(db *gorm.DB) {
+	workLocationTypes := []entities.WorkLocationType{
+		{Name: "Remote", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
+		{Name: "Hybrid", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
+		{Name: "OnSite", BaseEntity: entities.BaseEntity{CreatedBy: SystemUserID, LastModifiedBy: SystemUserID}},
 	}
+
+	db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "name"}},
+		DoNothing: true,
+	}).Create(&workLocationTypes)
 }

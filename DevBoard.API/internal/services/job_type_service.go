@@ -11,7 +11,7 @@ import (
 type JobTypeService interface {
 	CreateJobType(name string, userId uuid.UUID) (int, error)
 	GetJobTypeById(id int) (*entities.JobType, error)
-	GetAllJobTypes() ([]entities.JobType, error)
+	GetAllJobTypes(limit, offset int) ([]entities.JobType, error)
 	UpdateJobType(id int, name string) error
 	DeleteJobType(id int) error
 }
@@ -25,6 +25,13 @@ func NewJobTypeService(repo repository.JobTypeRepository) JobTypeService {
 }
 
 func (s *jobTypeService) CreateJobType(name string, userId uuid.UUID) (int, error) {
+	existing, err := s.repo.FindByName(name)
+	if err != nil {
+		return 0, err
+	}
+	if existing != nil {
+		return 0, apperrors.New(apperrors.Conflict, apperrors.ErrAlreadyExists)
+	}
 	jobType := &entities.JobType{
 		Name: name,
 		BaseEntity: entities.BaseEntity{
@@ -32,7 +39,7 @@ func (s *jobTypeService) CreateJobType(name string, userId uuid.UUID) (int, erro
 			LastModifiedBy: userId,
 		},
 	}
-	err := s.repo.Create(jobType)
+	err = s.repo.Create(jobType)
 	if err != nil {
 		return 0, err
 	}
@@ -50,8 +57,8 @@ func (s *jobTypeService) GetJobTypeById(id int) (*entities.JobType, error) {
 	return jobType, nil
 }
 
-func (s *jobTypeService) GetAllJobTypes() ([]entities.JobType, error) {
-	return s.repo.List(1000, 0)
+func (s *jobTypeService) GetAllJobTypes(limit, offset int) ([]entities.JobType, error) {
+	return s.repo.List(limit, offset)
 }
 
 func (s *jobTypeService) UpdateJobType(id int, name string) error {
