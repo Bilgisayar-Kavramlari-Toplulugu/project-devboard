@@ -78,18 +78,26 @@ export async function loginUser(payload) {
 }
 
 export async function signupUser(payload) {
+  const signupPayload = {
+    firstname: payload.firstName,
+    lastname: payload.lastName,
+    email: payload.email,
+    password: payload.password,
+    phoneNumber: payload.phoneNumber || '',
+    role: payload.role,
+  };
+
   const response = await fetch(`${API_BASE_URL}/auth/signup`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify(payload),
+    body: JSON.stringify(signupPayload),
   });
 
   return parseResponse(response);
 }
-
 export async function fetchRoles() {
   return [
     { id: 1, name: 'Developer' },

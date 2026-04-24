@@ -150,7 +150,7 @@
                   <div class="field">
                     <label class="label">Role</label>
                     <div class="input-wrap">
-                      <RoleIcon />
+                      <UserIcon />
                       <select
                         v-model="signup.role"
                         class="input select-input"
@@ -245,9 +245,7 @@ const EmailIcon = {
 const LockIcon = {
   template: `<svg class="input-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
 }
-const RoleIcon = {
-  template: `<svg class="input-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M4 20a8 8 0 1 1 16 0"/></svg>`
-}
+
 const UserIcon = {
   template: `<svg class="input-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M4 20a8 8 0 1 1 16 0"/></svg>`
 }
@@ -319,7 +317,9 @@ watch(() => props.modelValue, async (val) => {
     mode.value = props.initialMode
     document.addEventListener('keydown', onKeydown)
     document.body.style.overflow = 'hidden'
-    await loadRoles()
+    if (roles.value.length === 0) {
+  await loadRoles()
+}
   } else {
     document.removeEventListener('keydown', onKeydown)
     document.body.style.overflow = ''
@@ -374,7 +374,7 @@ function validatePassword(password, err) {
     return false
   }
   if (password.length < 8) {
-    err.password = 'Password must be at least 6 characters.'
+    err.password = 'Password must be at least 8 characters.'
     return false
   }
   err.password = ''
@@ -383,8 +383,10 @@ function validatePassword(password, err) {
 
 async function handleLogin() {
   loginApiError.value = ''
-  const ok = validateEmail(login.email, loginErr) & validatePassword(login.password, loginErr)
-  if (!ok) return
+  const isEmailValid = validateEmail(login.email, loginErr)
+const isPasswordValid = validatePassword(login.password, loginErr)
+
+if (!isEmailValid || !isPasswordValid) return
 
   loginLoading.value = true
   try {
@@ -404,7 +406,8 @@ async function handleSignup() {
   signupApiError.value = ''
   signupApiSuccess.value = ''
 
-  const ok = validateEmail(signup.email, signupErr) & validatePassword(signup.password, signupErr)
+  const isEmailValid = validateEmail(signup.email, signupErr)
+const isPasswordValid = validatePassword(signup.password, signupErr)
 
   signupErr.firstName = ''
   if (!signup.firstName.trim()) {
@@ -429,21 +432,21 @@ async function handleSignup() {
   }
 
   if (
-    !ok ||
-    signupErr.firstName ||
-    signupErr.lastName ||
-    signupErr.role ||
-    signupErr.confirmPassword
-  ) return
+  !isEmailValid ||
+  !isPasswordValid ||
+  signupErr.firstName ||
+  signupErr.lastName ||
+  signupErr.role ||
+  signupErr.confirmPassword
+) return
 
   signupLoading.value = true
   try {
     const response = await signupUser({
-  firstname: signup.firstName,
-  lastname: signup.lastName,
+  firstName: signup.firstName,
+  lastName: signup.lastName,
   email: signup.email,
   password: signup.password,
-  phoneNumber: '',
   role: signup.role
 })
 
