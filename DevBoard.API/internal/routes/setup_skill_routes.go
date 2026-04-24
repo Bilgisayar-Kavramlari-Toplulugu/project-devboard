@@ -17,7 +17,7 @@ func SetupSkillRoutes(api *gin.RouterGroup, skillHandler *handler.SkillHandler, 
 	skillAuthenticatedRoute.GET("/:id", skillHandler.GetById)
 
 	skillAuthorizedRoute := skillAuthenticatedRoute.Group("/")
-	//skillAuthorizedRoute.Use(middleware.AuthorizationMiddleware("admin"))
+	skillAuthorizedRoute.Use(middleware.AuthorizationMiddleware("admin"))
 
 	skillAuthorizedRoute.POST("/", skillHandler.Create)
 	skillAuthorizedRoute.DELETE("/:id", skillHandler.Delete)
