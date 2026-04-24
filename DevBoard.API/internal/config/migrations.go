@@ -19,6 +19,7 @@ func RunMigrations(db *gorm.DB) {
 		&domain.Role{},
 		&domain.JobType{},
 		&domain.SkillType{},
+		&domain.Skill{},
 	); err != nil {
 		log.Fatal("Migration Failed (Level 0 - Independent tables):", err)
 	}
