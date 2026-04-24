@@ -3,11 +3,13 @@ import { mount } from '@vue/test-utils'
 import App from '../App.vue'
 
 describe('App', () => {
-  it('mounts without errors', () => {
+  it('mounts renders properly', () => {
     const wrapper = mount(App, {
       global: {
-        stubs: { RouterView: true },
-      },
+        stubs: {
+          RouterView: true
+        }
+      }
     })
     expect(wrapper.exists()).toBe(true)
   })
