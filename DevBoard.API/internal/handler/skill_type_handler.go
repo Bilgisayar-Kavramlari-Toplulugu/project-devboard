@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"project-devboard/internal/domain/entities"
 	"project-devboard/internal/dtos"
 	"project-devboard/internal/services"
 	"project-devboard/pkg/apperrors"
@@ -39,7 +40,7 @@ func (h *SkillTypeHandler) Create(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	response.Success(c, http.StatusCreated, dtos.SkillTypeResponse{Id: skillTypeId, Name: req.Name})
+	response.Success(c, http.StatusCreated, dtos.NewSkillTypeResponse(&entities.SkillType{Id: skillTypeId, Name: req.Name}))
 }
 
 func (h *SkillTypeHandler) GetAll(c *gin.Context) {
@@ -48,7 +49,7 @@ func (h *SkillTypeHandler) GetAll(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	response.Success(c, http.StatusOK, skillTypes)
+	response.Success(c, http.StatusOK, dtos.NewSkillTypeResponses(skillTypes))
 }
 func (h *SkillTypeHandler) GetById(c *gin.Context) {
 	id := c.Param("id")
@@ -62,7 +63,7 @@ func (h *SkillTypeHandler) GetById(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	response.Success(c, http.StatusOK, skillType)
+	response.Success(c, http.StatusOK, dtos.NewSkillTypeResponse(skillType))
 }
 
 func (h *SkillTypeHandler) Update(c *gin.Context) {
@@ -89,7 +90,7 @@ func (h *SkillTypeHandler) Update(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	response.Success(c, http.StatusOK, dtos.SkillTypeResponse{Id: skillTypeId, Name: req.Name})
+	response.Success(c, http.StatusOK, dtos.NewSkillTypeResponse(&entities.SkillType{Id: skillTypeId, Name: req.Name}))
 }
 func (h *SkillTypeHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
