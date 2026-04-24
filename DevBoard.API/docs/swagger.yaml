@@ -7,6 +7,31 @@ definitions:
     required:
     - email
     type: object
+  dtos.JobTypeCreateRequest:
+    properties:
+      name:
+        maxLength: 500
+        minLength: 2
+        type: string
+    required:
+    - name
+    type: object
+  dtos.JobTypeResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dtos.JobTypeUpdateRequest:
+    properties:
+      name:
+        maxLength: 500
+        minLength: 2
+        type: string
+    required:
+    - name
+    type: object
   dtos.LoginRequest:
     properties:
       email:
@@ -141,6 +166,1054 @@ definitions:
         type: string
       phone_number:
         type: string
+    type: object
+  entities.Certificate:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      degree:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      expireDate:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      issueDate:
+        type: string
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      url:
+        type: string
+      user:
+        $ref: '#/definitions/entities.User'
+      userId:
+        type: string
+    type: object
+  entities.City:
+    properties:
+      code:
+        type: string
+      country:
+        $ref: '#/definitions/entities.Country'
+      countryId:
+        type: integer
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      displayOrder:
+        type: integer
+      educations:
+        items:
+          $ref: '#/definitions/entities.Education'
+        type: array
+      experiences:
+        items:
+          $ref: '#/definitions/entities.Experience'
+        type: array
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/entities.User'
+        type: array
+    type: object
+  entities.Country:
+    properties:
+      cities:
+        items:
+          $ref: '#/definitions/entities.City'
+        type: array
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      flagCode:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      phonePrefix:
+        type: string
+      shortCode:
+        type: string
+    type: object
+  entities.Education:
+    properties:
+      city:
+        $ref: '#/definitions/entities.City'
+      cityId:
+        type: integer
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      gdpr:
+        type: number
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      user:
+        $ref: '#/definitions/entities.User'
+      userId:
+        type: string
+    type: object
+  entities.Experience:
+    properties:
+      city:
+        $ref: '#/definitions/entities.City'
+      cityId:
+        type: integer
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      enddate:
+        type: string
+      id:
+        type: integer
+      information:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      position:
+        type: string
+      startdate:
+        type: string
+      user:
+        $ref: '#/definitions/entities.User'
+      userId:
+        type: string
+    type: object
+  entities.JobType:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      userJobTypes:
+        items:
+          $ref: '#/definitions/entities.UserJobType'
+        type: array
+    type: object
+  entities.Message:
+    properties:
+      body:
+        type: string
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      isHtml:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      receiver:
+        $ref: '#/definitions/entities.User'
+      receiverId:
+        type: string
+      sender:
+        $ref: '#/definitions/entities.User'
+      senderId:
+        type: string
+      subject:
+        type: string
+      type:
+        $ref: '#/definitions/entities.MessageTemplateType'
+      typeId:
+        type: integer
+    type: object
+  entities.MessageTemplate:
+    properties:
+      body:
+        type: integer
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      isHtml:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      subject:
+        type: integer
+      type:
+        $ref: '#/definitions/entities.MessageTemplateType'
+      typeId:
+        type: integer
+    type: object
+  entities.MessageTemplateType:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      messageTemplates:
+        items:
+          $ref: '#/definitions/entities.MessageTemplate'
+        type: array
+      messages:
+        items:
+          $ref: '#/definitions/entities.Message'
+        type: array
+      name:
+        type: string
+    type: object
+  entities.ProfessionalPlatform:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      professionalProfiles:
+        items:
+          $ref: '#/definitions/entities.ProfessionalProfile'
+        type: array
+    type: object
+  entities.ProfessionalProfile:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      platform:
+        $ref: '#/definitions/entities.ProfessionalPlatform'
+      platformId:
+        type: integer
+      url:
+        type: string
+      user:
+        $ref: '#/definitions/entities.User'
+      userId:
+        type: string
+    type: object
+  entities.Project:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      description:
+        type: string
+      endDate:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      ownerProjectRole:
+        type: integer
+      ownerRole:
+        $ref: '#/definitions/entities.ProjectRole'
+      projectDevelopers:
+        items:
+          $ref: '#/definitions/entities.ProjectDeveloper'
+        type: array
+      projectEndorsementables:
+        items:
+          $ref: '#/definitions/entities.ProjectEndorsementable'
+        type: array
+      savedProjects:
+        items:
+          $ref: '#/definitions/entities.SavedProject'
+        type: array
+      shortDescription:
+        type: string
+      startDate:
+        type: string
+      type:
+        $ref: '#/definitions/entities.ProjectType'
+      typeId:
+        type: integer
+      url:
+        type: string
+      user:
+        $ref: '#/definitions/entities.User'
+      userId:
+        type: string
+      userProjectSkills:
+        items:
+          $ref: '#/definitions/entities.UserProjectSkill'
+        type: array
+    type: object
+  entities.ProjectDeveloper:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      developer:
+        $ref: '#/definitions/entities.User'
+      developerId:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      project:
+        $ref: '#/definitions/entities.Project'
+      projectId:
+        type: integer
+      projectRole:
+        $ref: '#/definitions/entities.ProjectRole'
+      projectRoleId:
+        type: integer
+    type: object
+  entities.ProjectEndorsement:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      endorsementable:
+        $ref: '#/definitions/entities.ProjectEndorsementable'
+      endorsementableId:
+        type: integer
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      sender:
+        $ref: '#/definitions/entities.User'
+      senderId:
+        type: string
+    type: object
+  entities.ProjectEndorsementable:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      project:
+        $ref: '#/definitions/entities.Project'
+      projectEndorsements:
+        items:
+          $ref: '#/definitions/entities.ProjectEndorsement'
+        type: array
+      projectId:
+        type: integer
+      skillId:
+        type: integer
+    type: object
+  entities.ProjectRole:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      projectDevelopers:
+        items:
+          $ref: '#/definitions/entities.ProjectDeveloper'
+        type: array
+      projects:
+        items:
+          $ref: '#/definitions/entities.Project'
+        type: array
+    type: object
+  entities.ProjectType:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/entities.Project'
+        type: array
+    type: object
+  entities.PublicEndorsement:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      senderUser:
+        $ref: '#/definitions/entities.User'
+      senderUserId:
+        type: string
+      userSkill:
+        $ref: '#/definitions/entities.UserSkill'
+      userSkillId:
+        type: integer
+    type: object
+  entities.Reference:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      emailAddress:
+        type: string
+      firstname:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      lastname:
+        type: string
+      phoneNumber:
+        type: string
+      user:
+        $ref: '#/definitions/entities.User'
+      userId:
+        type: string
+    type: object
+  entities.Role:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      userRoles:
+        items:
+          $ref: '#/definitions/entities.UserRole'
+        type: array
+    type: object
+  entities.SavedDeveloper:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      developer:
+        $ref: '#/definitions/entities.User'
+      developerId:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      user:
+        $ref: '#/definitions/entities.User'
+      userId:
+        type: string
+    type: object
+  entities.SavedFilter:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      filterData:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      owner:
+        $ref: '#/definitions/entities.User'
+      ownerId:
+        type: string
+    type: object
+  entities.SavedProject:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      project:
+        $ref: '#/definitions/entities.Project'
+      projectId:
+        type: integer
+      user:
+        $ref: '#/definitions/entities.User'
+      userId:
+        type: string
+    type: object
+  entities.Skill:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      projectEndorsementables:
+        items:
+          $ref: '#/definitions/entities.ProjectEndorsementable'
+        type: array
+      skillType:
+        $ref: '#/definitions/entities.SkillType'
+      skillTypeId:
+        type: integer
+      userSkills:
+        items:
+          $ref: '#/definitions/entities.UserSkill'
+        type: array
+    type: object
+  entities.SkillType:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      skills:
+        items:
+          $ref: '#/definitions/entities.Skill'
+        type: array
+    type: object
+  entities.User:
+    properties:
+      birthdate:
+        type: string
+      certificates:
+        items:
+          $ref: '#/definitions/entities.Certificate'
+        type: array
+      city:
+        $ref: '#/definitions/entities.City'
+      cityId:
+        type: integer
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      educations:
+        items:
+          $ref: '#/definitions/entities.Education'
+        type: array
+      email:
+        type: string
+      experiences:
+        items:
+          $ref: '#/definitions/entities.Experience'
+        type: array
+      firstname:
+        type: string
+      gender:
+        type: integer
+      id:
+        type: string
+      isActive:
+        type: boolean
+      isEmailValidated:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      lastname:
+        type: string
+      phoneNumber:
+        type: string
+      professionalProfiles:
+        items:
+          $ref: '#/definitions/entities.ProfessionalProfile'
+        type: array
+      profilePicturePath:
+        type: string
+      projectDevelopers:
+        items:
+          $ref: '#/definitions/entities.ProjectDeveloper'
+        type: array
+      projectEndorsementsSent:
+        items:
+          $ref: '#/definitions/entities.ProjectEndorsement'
+        type: array
+      projects:
+        items:
+          $ref: '#/definitions/entities.Project'
+        type: array
+      publicEndorsementsSent:
+        items:
+          $ref: '#/definitions/entities.PublicEndorsement'
+        type: array
+      receivedMessages:
+        items:
+          $ref: '#/definitions/entities.Message'
+        type: array
+      references:
+        items:
+          $ref: '#/definitions/entities.Reference'
+        type: array
+      savedDevelopersByDev:
+        items:
+          $ref: '#/definitions/entities.SavedDeveloper'
+        type: array
+      savedDevelopersByUser:
+        items:
+          $ref: '#/definitions/entities.SavedDeveloper'
+        type: array
+      savedFilters:
+        items:
+          $ref: '#/definitions/entities.SavedFilter'
+        type: array
+      savedProjects:
+        items:
+          $ref: '#/definitions/entities.SavedProject'
+        type: array
+      sentMessages:
+        items:
+          $ref: '#/definitions/entities.Message'
+        type: array
+      title:
+        type: string
+      userJobTypes:
+        items:
+          $ref: '#/definitions/entities.UserJobType'
+        type: array
+      userRoles:
+        items:
+          $ref: '#/definitions/entities.UserRole'
+        type: array
+      userSkills:
+        items:
+          $ref: '#/definitions/entities.UserSkill'
+        type: array
+      userWorkLocationTypes:
+        items:
+          $ref: '#/definitions/entities.UserWorkLocationType'
+        type: array
+    type: object
+  entities.UserJobType:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      isActive:
+        type: boolean
+      jobType:
+        $ref: '#/definitions/entities.JobType'
+      jobTypeId:
+        type: integer
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      user:
+        $ref: '#/definitions/entities.User'
+      userId:
+        type: string
+    type: object
+  entities.UserProjectSkill:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      project:
+        $ref: '#/definitions/entities.Project'
+      projectId:
+        type: integer
+      userSkill:
+        $ref: '#/definitions/entities.UserSkill'
+      userSkillId:
+        type: integer
+    type: object
+  entities.UserRole:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      role:
+        $ref: '#/definitions/entities.Role'
+      roleId:
+        type: integer
+      user:
+        $ref: '#/definitions/entities.User'
+      userId:
+        type: string
+    type: object
+  entities.UserSkill:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      publicEndorsements:
+        items:
+          $ref: '#/definitions/entities.PublicEndorsement'
+        type: array
+      skill:
+        $ref: '#/definitions/entities.Skill'
+      skillId:
+        type: integer
+      user:
+        $ref: '#/definitions/entities.User'
+      userId:
+        type: string
+      userProjectSkills:
+        items:
+          $ref: '#/definitions/entities.UserProjectSkill'
+        type: array
+    type: object
+  entities.UserWorkLocationType:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      user:
+        $ref: '#/definitions/entities.User'
+      userId:
+        type: string
+      workLocationType:
+        $ref: '#/definitions/entities.WorkLocationType'
+      workLocationTypeId:
+        type: integer
+    type: object
+  entities.WorkLocationType:
+    properties:
+      createdBy:
+        type: string
+      createdOn:
+        type: string
+      deletedBy:
+        type: string
+      deletedOn:
+        type: string
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      lastModifiedBy:
+        type: string
+      lastModifiedOn:
+        type: string
+      name:
+        type: string
+      userWorkLocationTypes:
+        items:
+          $ref: '#/definitions/entities.UserWorkLocationType'
+        type: array
     type: object
   handler.MessageEnvelope:
     properties:
@@ -433,6 +1506,143 @@ paths:
       summary: User signup
       tags:
       - auth
+  /job-types:
+    get:
+      description: Get a list of all job types
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entities.JobType'
+                  type: array
+              type: object
+      summary: Get all job types
+      tags:
+      - JobTypes
+    post:
+      consumes:
+      - application/json
+      description: Create a new job type with the given name
+      parameters:
+      - description: Job type details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.JobTypeCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.JobTypeResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new job type
+      tags:
+      - JobTypes
+  /job-types/{id}:
+    delete:
+      description: Delete a job type by its ID
+      parameters:
+      - description: Job Type ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete a job type
+      tags:
+      - JobTypes
+    get:
+      description: Get details of a job type by its ID
+      parameters:
+      - description: Job Type ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/entities.JobType'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get a job type by ID
+      tags:
+      - JobTypes
+    put:
+      consumes:
+      - application/json
+      description: Update an existing job type's name
+      parameters:
+      - description: Job Type ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.JobTypeUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.JobTypeResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update a job type
+      tags:
+      - JobTypes
   /users:
     get:
       consumes:

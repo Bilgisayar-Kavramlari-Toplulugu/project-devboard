@@ -17,6 +17,8 @@ func RunMigrations(db *gorm.DB) {
 	if err := db.AutoMigrate(
 		&domain.User{},
 		&domain.Role{},
+		&domain.JobType{},
+		&domain.SkillType{},
 	); err != nil {
 		log.Fatal("Migration Failed (Level 0 - Independent tables):", err)
 	}
@@ -24,6 +26,7 @@ func RunMigrations(db *gorm.DB) {
 	// Seviye 1: Sadece Seviye 0'a bağımlı tablolar
 	if err := db.AutoMigrate(
 		&domain.UserRole{}, // -> User, Role
+		&domain.UserJobType{},
 		&domain.PasswordResetToken{},
 	); err != nil {
 		log.Fatal("Migration Failed (Level 1 - User dependent tables):", err)
@@ -32,6 +35,9 @@ func RunMigrations(db *gorm.DB) {
 	// Seviye 2: Seviye 0 ve 1'e bağımlı tablolar
 
 	// Seviye 3: Seviye 2'ye bağımlı tablolar
+
+	// Seed data
+	SeedData(db)
 
 	log.Println("Migrations completed successfully")
 }
