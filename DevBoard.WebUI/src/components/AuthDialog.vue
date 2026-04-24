@@ -4,14 +4,12 @@
       <div v-if="modelValue" class="overlay" @click.self="close">
         <div class="dialog" role="dialog" aria-modal="true">
 
-          <!-- Close -->
           <button class="close-btn" @click="close" aria-label="Close">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M18 6 6 18M6 6l12 12"/>
             </svg>
           </button>
 
-          <!-- Slider track: her iki panel yan yana, track kayıyor -->
           <div class="track-wrap">
             <div class="track" :class="{ 'show-signup': mode === 'signup' }">
 
@@ -23,12 +21,23 @@
                 </div>
 
                 <form class="form" @submit.prevent="handleLogin">
+                  <div v-if="loginApiError" class="api-message api-error">
+                    {{ loginApiError }}
+                  </div>
+
                   <div class="field">
                     <label class="label">Email</label>
                     <div class="input-wrap">
                       <EmailIcon />
-                      <input v-model="login.email" type="email" class="input" :class="{ error: loginErr.email }"
-                        placeholder="you@example.com" autocomplete="email" :tabindex="mode === 'login' ? 0 : -1" />
+                      <input
+                        v-model="login.email"
+                        type="email"
+                        class="input"
+                        :class="{ error: loginErr.email }"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        :tabindex="mode === 'login' ? 0 : -1"
+                      />
                     </div>
                     <span v-if="loginErr.email" class="field-error">{{ loginErr.email }}</span>
                   </div>
@@ -37,13 +46,19 @@
                     <label class="label">Password</label>
                     <div class="input-wrap">
                       <LockIcon />
-                      <input v-model="login.password" type="password" class="input" :class="{ error: loginErr.password }"
-                        placeholder="••••••••" autocomplete="current-password" :tabindex="mode === 'login' ? 0 : -1" />
+                      <input
+                        v-model="login.password"
+                        type="password"
+                        class="input"
+                        :class="{ error: loginErr.password }"
+                        placeholder="••••••••"
+                        autocomplete="current-password"
+                        :tabindex="mode === 'login' ? 0 : -1"
+                      />
                     </div>
                     <span v-if="loginErr.password" class="field-error">{{ loginErr.password }}</span>
                   </div>
 
-                  <!-- Spacer: signup'taki Confirm Password alanıyla piksel eşitliği -->
                   <div class="field field-spacer" aria-hidden="true">
                     <label class="label">&nbsp;</label>
                     <div class="input-wrap">
@@ -71,22 +86,102 @@
                 </div>
 
                 <form class="form" @submit.prevent="handleSignup">
+                  <div v-if="signupApiError" class="api-message api-error">
+                    {{ signupApiError }}
+                  </div>
+
+                  <div v-if="signupApiSuccess" class="api-message api-success">
+                    {{ signupApiSuccess }}
+                  </div>
+
+                  <div class="name-row">
+                    <div class="field">
+                      <label class="label">First Name</label>
+                      <div class="input-wrap">
+                        <UserIcon />
+                        <input
+                          v-model="signup.firstName"
+                          type="text"
+                          class="input"
+                          :class="{ error: signupErr.firstName }"
+                          placeholder="John"
+                          autocomplete="given-name"
+                          :tabindex="mode === 'signup' ? 0 : -1"
+                        />
+                      </div>
+                      <span v-if="signupErr.firstName" class="field-error">{{ signupErr.firstName }}</span>
+                    </div>
+
+                    <div class="field">
+                      <label class="label">Last Name</label>
+                      <div class="input-wrap">
+                        <UserIcon />
+                        <input
+                          v-model="signup.lastName"
+                          type="text"
+                          class="input"
+                          :class="{ error: signupErr.lastName }"
+                          placeholder="Doe"
+                          autocomplete="family-name"
+                          :tabindex="mode === 'signup' ? 0 : -1"
+                        />
+                      </div>
+                      <span v-if="signupErr.lastName" class="field-error">{{ signupErr.lastName }}</span>
+                    </div>
+                  </div>
+
                   <div class="field">
                     <label class="label">Email</label>
                     <div class="input-wrap">
                       <EmailIcon />
-                      <input v-model="signup.email" type="email" class="input" :class="{ error: signupErr.email }"
-                        placeholder="you@example.com" autocomplete="email" :tabindex="mode === 'signup' ? 0 : -1" />
+                      <input
+                        v-model="signup.email"
+                        type="email"
+                        class="input"
+                        :class="{ error: signupErr.email }"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        :tabindex="mode === 'signup' ? 0 : -1"
+                      />
                     </div>
                     <span v-if="signupErr.email" class="field-error">{{ signupErr.email }}</span>
+                  </div>
+
+                  <div class="field">
+                    <label class="label">Role</label>
+                    <div class="input-wrap">
+                      <UserIcon />
+                      <select
+                        v-model="signup.role"
+                        class="input select-input"
+                        :class="{ error: signupErr.role }"
+                        :disabled="rolesLoading"
+                        :tabindex="mode === 'signup' ? 0 : -1"
+                      >
+                        <option value="" disabled>
+                          {{ rolesLoading ? 'Loading roles...' : 'Select role' }}
+                        </option>
+                        <option v-for="role in roles" :key="role.id" :value="role.name">
+                          {{ role.name }}
+                        </option>
+                      </select>
+                    </div>
+                    <span v-if="signupErr.role" class="field-error">{{ signupErr.role }}</span>
                   </div>
 
                   <div class="field">
                     <label class="label">Password</label>
                     <div class="input-wrap">
                       <LockIcon />
-                      <input v-model="signup.password" type="password" class="input" :class="{ error: signupErr.password }"
-                        placeholder="••••••••" autocomplete="new-password" :tabindex="mode === 'signup' ? 0 : -1" />
+                      <input
+                        v-model="signup.password"
+                        type="password"
+                        class="input"
+                        :class="{ error: signupErr.password }"
+                        placeholder="••••••••"
+                        autocomplete="new-password"
+                        :tabindex="mode === 'signup' ? 0 : -1"
+                      />
                     </div>
                     <span v-if="signupErr.password" class="field-error">{{ signupErr.password }}</span>
                   </div>
@@ -106,7 +201,8 @@
                       />
                       <button type="button" class="eye-btn" @click="showConfirm = !showConfirm" tabindex="-1">
                         <svg v-if="showConfirm" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
                         </svg>
                         <svg v-else width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                           <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
@@ -118,7 +214,7 @@
                     <span v-if="signupErr.confirmPassword" class="field-error">{{ signupErr.confirmPassword }}</span>
                   </div>
 
-                  <button type="submit" class="submit-btn" :disabled="signupLoading" :tabindex="mode === 'signup' ? 0 : -1">
+                  <button type="submit" class="submit-btn" :disabled="signupLoading || rolesLoading" :tabindex="mode === 'signup' ? 0 : -1">
                     <span v-if="!signupLoading">Create Account</span>
                     <span v-else class="spinner"></span>
                   </button>
@@ -140,13 +236,18 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onBeforeUnmount } from 'vue'
+import { fetchRoles, loginUser, signupUser } from '../services/authService'
 
 const EmailIcon = {
   template: `<svg class="input-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>`
 }
 const LockIcon = {
   template: `<svg class="input-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+}
+
+const UserIcon = {
+  template: `<svg class="input-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M4 20a8 8 0 1 1 16 0"/></svg>`
 }
 
 const props = defineProps({
@@ -161,10 +262,32 @@ const showConfirm = ref(false)
 const login = reactive({ email: '', password: '' })
 const loginErr = reactive({ email: '', password: '' })
 const loginLoading = ref(false)
+const loginApiError = ref('')
 
-const signup = reactive({ email: '', password: '', confirmPassword: '' })
-const signupErr = reactive({ email: '', password: '', confirmPassword: '' })
+const signup = reactive({
+  firstName: '',
+  lastName: '',
+  email: '',
+  role: '',
+  password: '',
+  confirmPassword: ''
+})
+
+const signupErr = reactive({
+  firstName: '',
+  lastName: '',
+  email: '',
+  role: '',
+  password: '',
+  confirmPassword: ''
+})
+
 const signupLoading = ref(false)
+const signupApiError = ref('')
+const signupApiSuccess = ref('')
+
+const roles = ref([])
+const rolesLoading = ref(false)
 
 function switchTo(target) {
   mode.value = target
@@ -178,61 +301,175 @@ function onKeydown(e) {
   if (e.key === 'Escape') close()
 }
 
-watch(() => props.modelValue, (val) => {
+async function loadRoles() {
+  rolesLoading.value = true
+  try {
+    roles.value = await fetchRoles()
+  } catch (error) {
+    signupApiError.value = error.message || 'Failed to load roles.'
+  } finally {
+    rolesLoading.value = false
+  }
+}
+
+watch(() => props.modelValue, async (val) => {
   if (val) {
     mode.value = props.initialMode
     document.addEventListener('keydown', onKeydown)
     document.body.style.overflow = 'hidden'
+    if (roles.value.length === 0) {
+  await loadRoles()
+}
   } else {
     document.removeEventListener('keydown', onKeydown)
     document.body.style.overflow = ''
     Object.assign(login, { email: '', password: '' })
     Object.assign(loginErr, { email: '', password: '' })
-    Object.assign(signup, { email: '', password: '', confirmPassword: '' })
-    Object.assign(signupErr, { email: '', password: '', confirmPassword: '' })
+    Object.assign(signup, {
+      firstName: '',
+      lastName: '',
+      email: '',
+      role: '',
+      password: '',
+      confirmPassword: ''
+    })
+    Object.assign(signupErr, {
+      firstName: '',
+      lastName: '',
+      email: '',
+      role: '',
+      password: '',
+      confirmPassword: ''
+    })
+    loginApiError.value = ''
+    signupApiError.value = ''
+    signupApiSuccess.value = ''
     showConfirm.value = false
     loginLoading.value = false
     signupLoading.value = false
   }
 })
 
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', onKeydown)
+  document.body.style.overflow = ''
+})
+
 function validateEmail(email, err) {
-  if (!email) { err.email = 'Email is required.'; return false }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.email = 'Please enter a valid email.'; return false }
-  err.email = ''; return true
+  if (!email) {
+    err.email = 'Email is required.'
+    return false
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    err.email = 'Please enter a valid email.'
+    return false
+  }
+  err.email = ''
+  return true
 }
 
 function validatePassword(password, err) {
-  if (!password) { err.password = 'Password is required.'; return false }
-  if (password.length < 6) { err.password = 'Password must be at least 6 characters.'; return false }
-  err.password = ''; return true
+  if (!password) {
+    err.password = 'Password is required.'
+    return false
+  }
+  if (password.length < 8) {
+    err.password = 'Password must be at least 8 characters.'
+    return false
+  }
+  err.password = ''
+  return true
 }
 
 async function handleLogin() {
-  const ok = validateEmail(login.email, loginErr) & validatePassword(login.password, loginErr)
-  if (!ok) return
+  loginApiError.value = ''
+  const isEmailValid = validateEmail(login.email, loginErr)
+const isPasswordValid = validatePassword(login.password, loginErr)
+
+if (!isEmailValid || !isPasswordValid) return
+
   loginLoading.value = true
-  await new Promise(r => setTimeout(r, 1200))
-  loginLoading.value = false
+  try {
+    await loginUser({
+      email: login.email,
+      password: login.password
+    })
+    close()
+  } catch (error) {
+    loginApiError.value = error.message || 'Login failed.'
+  } finally {
+    loginLoading.value = false
+  }
 }
 
 async function handleSignup() {
-  const ok = validateEmail(signup.email, signupErr) & validatePassword(signup.password, signupErr)
+  signupApiError.value = ''
+  signupApiSuccess.value = ''
+
+  const isEmailValid = validateEmail(signup.email, signupErr)
+const isPasswordValid = validatePassword(signup.password, signupErr)
+
+  signupErr.firstName = ''
+  if (!signup.firstName.trim()) {
+    signupErr.firstName = 'First name is required.'
+  }
+
+  signupErr.lastName = ''
+  if (!signup.lastName.trim()) {
+    signupErr.lastName = 'Last name is required.'
+  }
+
+  signupErr.role = ''
+  if (!signup.role) {
+    signupErr.role = 'Role is required.'
+  }
+
   signupErr.confirmPassword = ''
   if (!signup.confirmPassword) {
     signupErr.confirmPassword = 'Please confirm your password.'
   } else if (signup.password !== signup.confirmPassword) {
     signupErr.confirmPassword = 'Passwords do not match.'
   }
-  if (!ok || signupErr.confirmPassword) return
+
+  if (
+  !isEmailValid ||
+  !isPasswordValid ||
+  signupErr.firstName ||
+  signupErr.lastName ||
+  signupErr.role ||
+  signupErr.confirmPassword
+) return
+
   signupLoading.value = true
-  await new Promise(r => setTimeout(r, 1200))
-  signupLoading.value = false
+  try {
+    const response = await signupUser({
+  firstName: signup.firstName,
+  lastName: signup.lastName,
+  email: signup.email,
+  password: signup.password,
+  role: signup.role
+})
+
+    signupApiSuccess.value = response?.message || 'Account created successfully.'
+
+    Object.assign(signup, {
+      firstName: '',
+      lastName: '',
+      email: '',
+      role: '',
+      password: '',
+      confirmPassword: ''
+    })
+    showConfirm.value = false
+  } catch (error) {
+    signupApiError.value = error.message || 'Signup failed.'
+  } finally {
+    signupLoading.value = false
+  }
 }
 </script>
 
 <style scoped>
-/* ── OVERLAY ── */
 .overlay {
   position: fixed;
   inset: 0;
@@ -246,7 +483,6 @@ async function handleSignup() {
   -webkit-backdrop-filter: blur(12px);
 }
 
-/* ── DIALOG ── */
 .dialog {
   position: relative;
   width: 100%;
@@ -262,7 +498,6 @@ async function handleSignup() {
   overflow: hidden;
 }
 
-/* ── CLOSE ── */
 .close-btn {
   position: absolute;
   top: 1rem;
@@ -282,8 +517,6 @@ async function handleSignup() {
 }
 .close-btn:hover { background: rgba(255,255,255,0.09); color: rgba(226,232,240,0.85); }
 
-/* ── TRACK ── */
-/* track-wrap klipler, track iki panel genişliğinde, translateX ile kayar */
 .track-wrap {
   overflow: hidden;
 }
@@ -298,13 +531,11 @@ async function handleSignup() {
   transform: translateX(-50%);
 }
 
-/* ── PANEL ── */
 .panel {
-  width: 50%; /* track'in yarısı = dialog genişliği */
+  width: 50%;
   flex-shrink: 0;
 }
 
-/* ── PANEL HEAD ── */
 .panel-head { margin-bottom: 1.5rem; }
 
 .dialog-title {
@@ -320,8 +551,13 @@ async function handleSignup() {
   font-size: 0.83rem;
 }
 
-/* ── FORM ── */
 .form { display: flex; flex-direction: column; gap: 1rem; }
+
+.name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
 
 .field { display: flex; flex-direction: column; gap: 0.35rem; }
 
@@ -339,9 +575,11 @@ async function handleSignup() {
   left: 0.8rem;
   color: rgba(226,232,240,0.25);
   pointer-events: none;
+  z-index: 1;
 }
 
-.input {
+.input,
+.select-input {
   width: 100%;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
@@ -354,13 +592,21 @@ async function handleSignup() {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+.select-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
 .input::placeholder { color: rgba(226,232,240,0.18); }
-.input:focus { border-color: rgba(168,85,247,0.5); box-shadow: 0 0 0 3px rgba(168,85,247,0.1); }
-.input.error { border-color: rgba(239,68,68,0.5); }
-.input.error:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
+.input:focus,
+.select-input:focus { border-color: rgba(168,85,247,0.5); box-shadow: 0 0 0 3px rgba(168,85,247,0.1); }
+.input.error,
+.select-input.error { border-color: rgba(239,68,68,0.5); }
+.input.error:focus,
+.select-input.error:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
 .input-with-toggle { padding-right: 2.6rem; }
 
-/* spacer: login'e Confirm Password alanı kadar alan açar, tamamen görünmez */
 .field-spacer { visibility: hidden; pointer-events: none; }
 
 .eye-btn {
@@ -380,7 +626,25 @@ async function handleSignup() {
 
 .field-error { font-size: 0.72rem; color: #f87171; }
 
-/* ── SUBMIT ── */
+.api-message {
+  font-size: 0.78rem;
+  border-radius: 10px;
+  padding: 0.7rem 0.85rem;
+  margin-bottom: 0.15rem;
+}
+
+.api-error {
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.api-success {
+  color: #bbf7d0;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
 .submit-btn {
   margin-top: 0.25rem;
   width: 100%;
@@ -412,7 +676,6 @@ async function handleSignup() {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── SWITCH HINT ── */
 .switch-hint {
   text-align: center;
   margin-top: 1.2rem;
@@ -433,9 +696,15 @@ async function handleSignup() {
 }
 .switch-link:hover { color: #c084fc; }
 
-/* ── OVERLAY FADE ── */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.22s ease; }
 .fade-enter-active .dialog, .fade-leave-active .dialog { transition: opacity 0.22s ease, transform 0.22s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .fade-enter-from .dialog, .fade-leave-to .dialog { opacity: 0; transform: scale(0.96) translateY(8px); }
+
+@media (max-width: 520px) {
+  .name-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
 </style>
