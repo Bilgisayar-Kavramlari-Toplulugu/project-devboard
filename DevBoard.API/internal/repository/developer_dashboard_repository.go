@@ -8,7 +8,8 @@ import (
 )
 
 type DeveloperDashboardRepository interface {
-	GetUserProfile(id uuid.UUID) (*domain.User, error)
+	GetUserProfile(username string) (*domain.User, error)
+	GetUserProfileByID(id uuid.UUID) (*domain.User, error)
 }
 
 type developerDashboardRepository struct {
@@ -19,7 +20,36 @@ func NewDeveloperDashboardRepository(db *gorm.DB) DeveloperDashboardRepository {
 	return &developerDashboardRepository{db: db}
 }
 
-func (r *developerDashboardRepository) GetUserProfile(id uuid.UUID) (*domain.User, error) {
+func (r *developerDashboardRepository) GetUserProfile(username string) (*domain.User, error) {
+	var user domain.User
+	err := r.db.
+		Preload("City").
+		Preload("UserSkills.Skill").
+		Preload("Certificates").
+		Preload("Experiences").
+		Preload("Educations").
+		Preload("ProfessionalProfiles").
+		Preload("UserJobTypes.JobType").
+		Preload("UserWorkLocationTypes.WorkLocationType").
+		Preload("Projects").
+		Preload("SentMessages").
+		Preload("ReceivedMessages").
+		Preload("PublicEndorsementsSent").
+		Preload("ProjectEndorsementsSent").
+		Preload("References").
+		Where("username = ?", username).
+		First(&user).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *developerDashboardRepository) GetUserProfileByID(id uuid.UUID) (*domain.User, error) {
 	var user domain.User
 	err := r.db.
 		Preload("City").

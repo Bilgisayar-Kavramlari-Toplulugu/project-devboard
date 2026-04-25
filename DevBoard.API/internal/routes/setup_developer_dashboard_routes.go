@@ -14,6 +14,7 @@ func SetupDeveloperDashboardRoutes(rg *gin.RouterGroup, h *handler.DeveloperDash
 	dashboard.Use(middleware.JWTMiddleware(jwtService, config.AccessTokenCookieName))
 	dashboard.Use(middleware.AuthorizationMiddleware("Developer"))
 	{
-		dashboard.GET("", h.GetDashboardData)
+		dashboard.GET("/me", h.GetCurrentUserDashboardData)
+		dashboard.GET("/:username", h.GetDashboardDataByUsername)
 	}
 }

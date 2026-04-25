@@ -9,6 +9,7 @@ import (
 )
 
 type UserCreateRequest struct {
+	Username    string  `json:"username" validate:"required,min=3,max=50,alphanum"`
 	Email       string  `json:"email" validate:"required,email"`
 	Password    string  `json:"password" validate:"required,min=6"`
 	Firstname   string  `json:"firstname" validate:"required,min=2,max=100"`
@@ -26,6 +27,7 @@ type UserUpdateRequest struct {
 
 type UserResponse struct {
 	ID               uuid.UUID  `json:"id"`
+	Username         string     `json:"username"`
 	Email            string     `json:"email"`
 	Firstname        string     `json:"firstname"`
 	Lastname         string     `json:"lastname"`
@@ -56,6 +58,7 @@ func NewUserResponse(user *entities.User) *UserResponse {
 
 	return &UserResponse{
 		ID:               user.Id,
+		Username:         user.Username,
 		Email:            user.Email,
 		Firstname:        user.Firstname,
 		Lastname:         user.Lastname,

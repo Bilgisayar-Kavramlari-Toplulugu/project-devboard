@@ -3,7 +3,6 @@ package handler
 import (
 	"net/http"
 
-	"project-devboard/internal/dtos"
 	"project-devboard/internal/services"
 	"project-devboard/pkg/apperrors"
 	"project-devboard/pkg/response"
@@ -39,14 +38,13 @@ func (h *DeveloperDashboardHandler) GetCurrentUserDashboardData(c *gin.Context) 
 		return
 	}
 
-	user, err := h.service.GetDashboardData(userID)
+	userDTO, err := h.service.GetCurrentUserDashboardData(userID)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	res := dtos.NewDeveloperDashboardResponse(user)
-	response.Success(c, http.StatusOK, res)
+	response.Success(c, http.StatusOK, userDTO)
 }
 
 // GetDashboardData godoc
@@ -60,26 +58,19 @@ func (h *DeveloperDashboardHandler) GetCurrentUserDashboardData(c *gin.Context) 
 // @Failure      403  {object}  response.Response  "Forbidden"
 // @Failure      404  {object}  response.Response  "User not found"
 // @Failure      500  {object}  response.Response  "Internal Server Error"
-// @Router       /developer/dashboard/{id} [get]
-func (h *DeveloperDashboardHandler) GetDashboardDataByUserID(c *gin.Context) {
-	userIDStr := c.Param("id")
-	if userIDStr == "" {
-		c.Error(apperrors.New(apperrors.BadRequest, apperrors.ErrInvalidUserID))
+// @Router       /developer/dashboard/{username} [get]
+func (h *DeveloperDashboardHandler) GetDashboardDataByUsername(c *gin.Context) {
+	username := c.Param("username")
+	if username == "" {
+		c.Error(apperrors.New(apperrors.BadRequest, apperrors.ErrInvalidRequest))
 		return
 	}
 
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		c.Error(apperrors.New(apperrors.BadRequest, apperrors.ErrInvalidUUID))
-		return
-	}
-
-	user, err := h.service.GetDashboardData(userID)
+	userDTO, err := h.service.GetDashboardData(username)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	res := dtos.NewDeveloperDashboardResponse(user)
-	response.Success(c, http.StatusOK, res)
+	response.Success(c, http.StatusOK, userDTO)
 }

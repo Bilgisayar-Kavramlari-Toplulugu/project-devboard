@@ -40,7 +40,7 @@ func NewAuthService(db *gorm.DB, userRepo repository.UserRepository, jwtService 
 }
 
 func (s *authService) Login(req dtos.LoginRequest) (*domain.User, *TokenPair, error) {
-	user, err := s.userRepo.GetByEmailWithRoles(req.Email)
+	user, err := s.userRepo.GetByIdentifierWithRoles(req.Identifier)
 	if err != nil {
 		return nil, nil, apperrors.Wrap(apperrors.InternalError, apperrors.ErrInternalServer, err)
 	}
@@ -75,12 +75,22 @@ func (s *authService) Signup(req dtos.SignupRequest, actorID uuid.UUID) (*TokenP
 
 	txUserRepo := s.userRepo.WithTx(tx)
 
-	existing, err := txUserRepo.GetByEmail(req.Email)
+	existingEmail, err := txUserRepo.GetByIdentifier(req.Email)
 	if err != nil {
 		tx.Rollback()
 		return nil, apperrors.Wrap(apperrors.InternalError, apperrors.ErrInternalServer, err)
 	}
-	if existing != nil {
+	if existingEmail != nil {
+		tx.Rollback()
+		return nil, apperrors.New(apperrors.Conflict, apperrors.ErrUserAlreadyExists)
+	}
+
+	existingUsername, err := txUserRepo.GetByIdentifier(req.Username)
+	if err != nil {
+		tx.Rollback()
+		return nil, apperrors.Wrap(apperrors.InternalError, apperrors.ErrInternalServer, err)
+	}
+	if existingUsername != nil {
 		tx.Rollback()
 		return nil, apperrors.New(apperrors.Conflict, apperrors.ErrUserAlreadyExists)
 	}
@@ -98,6 +108,7 @@ func (s *authService) Signup(req dtos.SignupRequest, actorID uuid.UUID) (*TokenP
 
 	newUser := &domain.User{
 		Id:               newUserID,
+		Username:         req.Username,
 		Email:            req.Email,
 		Password:         string(hashed),
 		Firstname:        req.Firstname,
@@ -194,7 +205,7 @@ func (s *authService) GetMe(userID uuid.UUID) (*domain.User, error) {
 }
 
 func (s *authService) ForgotPassword(email string) error {
-	user, err := s.userRepo.GetByEmail(email)
+	user, err := s.userRepo.GetByIdentifier(email)
 	if err != nil {
 		return apperrors.Wrap(apperrors.InternalError, apperrors.ErrInternalServer, err)
 	}
