@@ -130,20 +130,57 @@ func NewDeveloperDashboardResponse(user *entities.User) DeveloperDashboardRespon
 	// Map Messages
 	sentMsgs := make([]MessageDTO, len(user.SentMessages))
 	for i, m := range user.SentMessages {
-		sentMsgs[i] = MessageDTO{Id: m.Id, SenderId: m.SenderId, Subject: m.Subject, Body: m.Body, IsHtml: m.IsHtml}
+		sentMsgs[i] = MessageDTO{
+			Id:                   m.Id,
+			SenderId:             m.SenderId,
+			ReceiverId:           m.ReceiverId,
+			SenderEmailAddress:   m.Sender.Email,
+			ReceiverEmailAddress: m.Receiver.Email,
+			Subject:              m.Subject,
+			Body:                 m.Body,
+			IsHtml:               m.IsHtml,
+			SentDate:             m.CreatedOn,
+		}
 	}
 	receivedMsgs := make([]MessageDTO, len(user.ReceivedMessages))
 	for i, m := range user.ReceivedMessages {
-		receivedMsgs[i] = MessageDTO{Id: m.Id, SenderId: m.SenderId, Subject: m.Subject, Body: m.Body, IsHtml: m.IsHtml}
+		receivedMsgs[i] = MessageDTO{
+			Id:                   m.Id,
+			SenderId:             m.SenderId,
+			ReceiverId:           m.ReceiverId,
+			SenderEmailAddress:   m.Sender.Email,
+			ReceiverEmailAddress: m.Receiver.Email,
+			Subject:              m.Subject,
+			Body:                 m.Body,
+			IsHtml:               m.IsHtml,
+			SentDate:             m.CreatedOn,
+		}
 	}
 	// Map Endorsements
 	pubEnd := make([]PublicEndorsementDTO, len(user.PublicEndorsementsSent))
 	for i, e := range user.PublicEndorsementsSent {
-		pubEnd[i] = PublicEndorsementDTO{Id: e.Id, UserSkillId: e.UserSkillId, SenderUserId: e.SenderUserId}
+		pubEnd[i] = PublicEndorsementDTO{
+			Id:                  e.Id,
+			UserSkillId:         e.UserSkillId,
+			SenderUserId:        e.SenderUserId,
+			SenderUserFirstName: e.SenderUser.Firstname,
+			SenderUserLastName:  e.SenderUser.Lastname,
+			SenderEmailAddress:  e.SenderUser.Email,
+			CreatedDate:         e.CreatedOn,
+		}
 	}
 	projEnd := make([]ProjectEndorsementDTO, len(user.ProjectEndorsementsSent))
 	for i, e := range user.ProjectEndorsementsSent {
-		projEnd[i] = ProjectEndorsementDTO{Id: e.Id, EndorsementableId: e.EndorsementableId, SenderId: e.SenderId}
+		endorsementableName := ""
+		if e.Endorsementable.Project != nil {
+			endorsementableName = e.Endorsementable.Project.Name
+		}
+		projEnd[i] = ProjectEndorsementDTO{
+			Id:                  e.Id,
+			EndorsementableId:   e.EndorsementableId,
+			EndorsementableName: endorsementableName,
+			SenderId:            e.SenderId,
+		}
 	}
 	// Map References
 	refs := make([]ReferenceDTO, len(user.References))

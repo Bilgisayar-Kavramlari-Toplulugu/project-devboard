@@ -32,10 +32,12 @@ func (r *developerDashboardRepository) GetUserProfile(username string) (*domain.
 		Preload("UserJobTypes.JobType").
 		Preload("UserWorkLocationTypes.WorkLocationType").
 		Preload("Projects.Type").
-		Preload("SentMessages").
-		Preload("ReceivedMessages").
-		Preload("PublicEndorsementsSent").
-		Preload("ProjectEndorsementsSent").
+		Preload("SentMessages.Sender").
+		Preload("SentMessages.Receiver").
+		Preload("ReceivedMessages.Sender").
+		Preload("ReceivedMessages.Receiver").
+		Preload("PublicEndorsementsSent.SenderUser").
+		Preload("ProjectEndorsementsSent.Endorsementable.Project").
 		Preload("References").
 		Where("username = ?", username).
 		First(&user).Error
@@ -61,10 +63,12 @@ func (r *developerDashboardRepository) GetUserProfileByID(id uuid.UUID) (*domain
 		Preload("UserJobTypes.JobType").
 		Preload("UserWorkLocationTypes.WorkLocationType").
 		Preload("Projects.Type").
-		Preload("SentMessages").
-		Preload("ReceivedMessages").
-		Preload("PublicEndorsementsSent").
-		Preload("ProjectEndorsementsSent").
+		Preload("SentMessages.Sender").
+		Preload("SentMessages.Receiver").
+		Preload("ReceivedMessages.Sender").
+		Preload("ReceivedMessages.Receiver").
+		Preload("PublicEndorsementsSent.SenderUser").
+		Preload("ProjectEndorsementsSent.Endorsementable.Project").
 		Preload("References").
 		Where("id = ?", id).
 		First(&user).Error
