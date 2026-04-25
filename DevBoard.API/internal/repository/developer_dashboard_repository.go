@@ -23,15 +23,15 @@ func NewDeveloperDashboardRepository(db *gorm.DB) DeveloperDashboardRepository {
 func (r *developerDashboardRepository) GetUserProfile(username string) (*domain.User, error) {
 	var user domain.User
 	err := r.db.
-		Preload("City").
+		Preload("City.Country").
 		Preload("UserSkills.Skill").
 		Preload("Certificates").
-		Preload("Experiences").
-		Preload("Educations").
-		Preload("ProfessionalProfiles").
+		Preload("Experiences.City.Country").
+		Preload("Educations.City.Country").
+		Preload("ProfessionalProfiles.Platform").
 		Preload("UserJobTypes.JobType").
 		Preload("UserWorkLocationTypes.WorkLocationType").
-		Preload("Projects").
+		Preload("Projects.Type").
 		Preload("SentMessages").
 		Preload("ReceivedMessages").
 		Preload("PublicEndorsementsSent").
@@ -52,15 +52,15 @@ func (r *developerDashboardRepository) GetUserProfile(username string) (*domain.
 func (r *developerDashboardRepository) GetUserProfileByID(id uuid.UUID) (*domain.User, error) {
 	var user domain.User
 	err := r.db.
-		Preload("City").
+		Preload("City.Country").
 		Preload("UserSkills.Skill").
 		Preload("Certificates").
-		Preload("Experiences").
-		Preload("Educations").
-		Preload("ProfessionalProfiles").
+		Preload("Experiences.City.Country").
+		Preload("Educations.City.Country").
+		Preload("ProfessionalProfiles.Platform").
 		Preload("UserJobTypes.JobType").
 		Preload("UserWorkLocationTypes.WorkLocationType").
-		Preload("Projects").
+		Preload("Projects.Type").
 		Preload("SentMessages").
 		Preload("ReceivedMessages").
 		Preload("PublicEndorsementsSent").

@@ -7,85 +7,36 @@ import (
 	"github.com/google/uuid"
 )
 
-type DeveloperDashboardResponse struct {
-	Id                      uuid.UUID                       `json:"id"`
-	Email                   string                          `json:"email"`
-	Firstname               string                          `json:"firstname"`
-	Lastname                string                          `json:"lastname"`
-	PhoneNumber             *string                         `json:"phoneNumber"`
-	Birthdate               *time.Time                      `json:"birthdate"`
-	Gender                  *int                            `json:"gender"`
-	ProfilePicturePath      *string                         `json:"profilePicturePath"`
-	Title                   *string                         `json:"title"`
-	City                    *entities.City                  `json:"city"`
-	Skills                  []entities.UserSkill            `json:"skills"`
-	Certificates            []entities.Certificate          `json:"certificates"`
-	Experiences             []entities.Experience           `json:"experiences"`
-	Educations              []entities.Education            `json:"educations"`
-	ProfessionalProfiles    []entities.ProfessionalProfile  `json:"professionalProfiles"`
-	JobTypes                []entities.UserJobType          `json:"jobTypes"`
-	WorkLocationTypes       []entities.UserWorkLocationType `json:"workLocationTypes"`
-	Projects                []entities.Project              `json:"projects"`
-	SentMessages            []entities.Message              `json:"sentMessages"`
-	ReceivedMessages        []entities.Message              `json:"receivedMessages"`
-	PublicEndorsementsSent  []entities.PublicEndorsement    `json:"publicEndorsementsSent"`
-	ProjectEndorsementsSent []entities.ProjectEndorsement   `json:"projectEndorsementsSent"`
-	References              []entities.Reference            `json:"references"`
-}
 
-func NewDeveloperDashboardResponse(user *entities.User) DeveloperDashboardResponse {
-	return DeveloperDashboardResponse{
-		Id:                      user.Id,
-		Email:                   user.Email,
-		Firstname:               user.Firstname,
-		Lastname:                user.Lastname,
-		PhoneNumber:             user.PhoneNumber,
-		Birthdate:               user.Birthdate,
-		Gender:                  user.Gender,
-		ProfilePicturePath:      user.ProfilePicturePath,
-		Title:                   user.Title,
-		City:                    user.City,
-		Skills:                  user.UserSkills,
-		Certificates:            user.Certificates,
-		Experiences:             user.Experiences,
-		Educations:              user.Educations,
-		ProfessionalProfiles:    user.ProfessionalProfiles,
-		JobTypes:                user.UserJobTypes,
-		WorkLocationTypes:       user.UserWorkLocationTypes,
-		Projects:                user.Projects,
-		SentMessages:            user.SentMessages,
-		ReceivedMessages:        user.ReceivedMessages,
-		PublicEndorsementsSent:  user.PublicEndorsementsSent,
-		ProjectEndorsementsSent: user.ProjectEndorsementsSent,
-		References:              user.References,
-	}
+
+type DeveloperDashboardResponse struct {
+	Id                      uuid.UUID                `json:"id"`
+	Email                   string                   `json:"email"`
+	Firstname               string                   `json:"firstname"`
+	Lastname                string                   `json:"lastname"`
+	PhoneNumber             *string                  `json:"phoneNumber"`
+	Birthdate               *time.Time               `json:"birthdate"`
+	Gender                  *int                     `json:"gender"`
+	ProfilePicturePath      *string                  `json:"profilePicturePath"`
+	Title                   *string                  `json:"title"`
+	Location                *LocationDTO             `json:"location"`
+	Skills                  []UserSkillDTO           `json:"skills"`
+	Certificates            []CertificateDTO         `json:"certificates"`
+	Experiences             []ExperienceDTO          `json:"experiences"`
+	Educations              []EducationDTO           `json:"educations"`
+	ProfessionalProfiles    []ProfessionalProfileDTO `json:"professionalProfiles"`
+	JobTypes                []JobTypeDTO             `json:"jobTypes"`
+	WorkLocationTypes       []WorkLocationTypeDTO    `json:"workLocationTypes"`
+	Projects                []ProjectDTO             `json:"projects"`
+	SentMessages            []MessageDTO             `json:"sentMessages"`
+	ReceivedMessages        []MessageDTO             `json:"receivedMessages"`
+	PublicEndorsementsSent  []PublicEndorsementDTO   `json:"publicEndorsementsSent"`
+	ProjectEndorsementsSent []ProjectEndorsementDTO  `json:"projectEndorsementsSent"`
+	References              []ReferenceDTO           `json:"references"`
 }
 
 type CurrentUserDashboardResponse struct {
-	Id                      uuid.UUID                       `json:"id"`
-	Email                   string                          `json:"email"`
-	Firstname               string                          `json:"firstname"`
-	Lastname                string                          `json:"lastname"`
-	PhoneNumber             *string                         `json:"phoneNumber"`
-	Birthdate               *time.Time                      `json:"birthdate"`
-	Gender                  *int                            `json:"gender"`
-	ProfilePicturePath      *string                         `json:"profilePicturePath"`
-	Title                   *string                         `json:"title"`
-	City                    *entities.City                  `json:"city"`
-	Skills                  []entities.UserSkill            `json:"skills"`
-	Certificates            []entities.Certificate          `json:"certificates"`
-	Experiences             []entities.Experience           `json:"experiences"`
-	Educations              []entities.Education            `json:"educations"`
-	ProfessionalProfiles    []entities.ProfessionalProfile  `json:"professionalProfiles"`
-	JobTypes                []entities.UserJobType          `json:"jobTypes"`
-	WorkLocationTypes       []entities.UserWorkLocationType `json:"workLocationTypes"`
-	Projects                []entities.Project              `json:"projects"`
-	SentMessages            []entities.Message              `json:"sentMessages"`
-	ReceivedMessages        []entities.Message              `json:"receivedMessages"`
-	PublicEndorsementsSent  []entities.PublicEndorsement    `json:"publicEndorsementsSent"`
-	ProjectEndorsementsSent []entities.ProjectEndorsement   `json:"projectEndorsementsSent"`
-	References              []entities.Reference            `json:"references"`
-
+	DeveloperDashboardResponse
 	SkillsCount                  int     `json:"skillsCount"`
 	CertificatesCount            int     `json:"certificatesCount"`
 	ExperiencesCount             int     `json:"experiencesCount"`
@@ -102,31 +53,134 @@ type CurrentUserDashboardResponse struct {
 	ProfileCompletePercentage    float64 `json:"profileCompletePercentage"`
 }
 
+// Map functions
+func mapLocation(city *entities.City) *LocationDTO {
+	if city == nil {
+		return nil
+	}
+	countryName := ""
+	if city.Country != nil {
+		countryName = city.Country.Name
+	}
+	locName := city.Name
+	if countryName != "" {
+		if locName != "" {
+			locName = locName + ", " + countryName
+		} else {
+			locName = countryName
+		}
+	}
+	return &LocationDTO{
+		CityId:      city.Id,
+		CityName:    city.Name,
+		CountryName: countryName,
+		Name:        locName,
+	}
+}
+
+func NewDeveloperDashboardResponse(user *entities.User) DeveloperDashboardResponse {
+	// Map Skills
+	skills := make([]UserSkillDTO, len(user.UserSkills))
+	for i, s := range user.UserSkills {
+		skills[i] = UserSkillDTO{Id: s.Id, SkillId: s.SkillId, SkillName: s.Skill.Name}
+	}
+	// Map Certificates
+	certs := make([]CertificateDTO, len(user.Certificates))
+	for i, c := range user.Certificates {
+		certs[i] = CertificateDTO{Id: c.Id, Name: c.Name, Degree: c.Degree, IssueDate: c.IssueDate, ExpireDate: c.ExpireDate, Url: c.Url}
+	}
+	// Map Experiences
+	exps := make([]ExperienceDTO, len(user.Experiences))
+	for i, e := range user.Experiences {
+		exps[i] = ExperienceDTO{Id: e.Id, Name: e.Name, Location: mapLocation(&e.City), Startdate: e.Startdate, Enddate: e.Enddate, Position: e.Position, Information: e.Information}
+	}
+	// Map Educations
+	edus := make([]EducationDTO, len(user.Educations))
+	for i, e := range user.Educations {
+		edus[i] = EducationDTO{Id: e.Id, Name: e.Name, Location: mapLocation(&e.City), GDPR: e.GDPR}
+	}
+	// Map Profiles
+	profs := make([]ProfessionalProfileDTO, len(user.ProfessionalProfiles))
+	for i, p := range user.ProfessionalProfiles {
+		pName := ""
+		if p.Platform.Name != nil {
+			pName = *p.Platform.Name
+		}
+		profs[i] = ProfessionalProfileDTO{Id: p.Id, PlatformId: p.PlatformId, PlatformName: pName, Url: p.Url}
+	}
+	// Map Job Types
+	jobTypes := make([]JobTypeDTO, len(user.UserJobTypes))
+	for i, jt := range user.UserJobTypes {
+		jobTypes[i] = JobTypeDTO{Id: jt.JobTypeId, Name: jt.JobType.Name}
+	}
+	// Map Work Location Types
+	workLocs := make([]WorkLocationTypeDTO, len(user.UserWorkLocationTypes))
+	for i, wl := range user.UserWorkLocationTypes {
+		wlName := ""
+		if wl.WorkLocationType.Name != nil {
+			wlName = *wl.WorkLocationType.Name
+		}
+		workLocs[i] = WorkLocationTypeDTO{Id: wl.WorkLocationTypeId, Name: wlName}
+	}
+	// Map Projects
+	projects := make([]ProjectDTO, len(user.Projects))
+	for i, p := range user.Projects {
+		projects[i] = ProjectDTO{Id: p.Id, TypeId: p.TypeId, TypeName: p.Type.Name, Name: p.Name, ShortDescription: p.ShortDescription, Description: p.Description, StartDate: p.StartDate, EndDate: p.EndDate, Url: p.Url}
+	}
+	// Map Messages
+	sentMsgs := make([]MessageDTO, len(user.SentMessages))
+	for i, m := range user.SentMessages {
+		sentMsgs[i] = MessageDTO{Id: m.Id, SenderId: m.SenderId, Subject: m.Subject, Body: m.Body, IsHtml: m.IsHtml}
+	}
+	receivedMsgs := make([]MessageDTO, len(user.ReceivedMessages))
+	for i, m := range user.ReceivedMessages {
+		receivedMsgs[i] = MessageDTO{Id: m.Id, SenderId: m.SenderId, Subject: m.Subject, Body: m.Body, IsHtml: m.IsHtml}
+	}
+	// Map Endorsements
+	pubEnd := make([]PublicEndorsementDTO, len(user.PublicEndorsementsSent))
+	for i, e := range user.PublicEndorsementsSent {
+		pubEnd[i] = PublicEndorsementDTO{Id: e.Id, UserSkillId: e.UserSkillId, SenderUserId: e.SenderUserId}
+	}
+	projEnd := make([]ProjectEndorsementDTO, len(user.ProjectEndorsementsSent))
+	for i, e := range user.ProjectEndorsementsSent {
+		projEnd[i] = ProjectEndorsementDTO{Id: e.Id, EndorsementableId: e.EndorsementableId, SenderId: e.SenderId}
+	}
+	// Map References
+	refs := make([]ReferenceDTO, len(user.References))
+	for i, r := range user.References {
+		refs[i] = ReferenceDTO{Id: r.Id, Firstname: r.Firstname, Lastname: r.Lastname, PhoneNumber: r.PhoneNumber, EmailAddress: r.EmailAddress}
+	}
+
+	return DeveloperDashboardResponse{
+		Id:                      user.Id,
+		Email:                   user.Email,
+		Firstname:               user.Firstname,
+		Lastname:                user.Lastname,
+		PhoneNumber:             user.PhoneNumber,
+		Birthdate:               user.Birthdate,
+		Gender:                  user.Gender,
+		ProfilePicturePath:      user.ProfilePicturePath,
+		Title:                   user.Title,
+		Location:                mapLocation(user.City),
+		Skills:                  skills,
+		Certificates:            certs,
+		Experiences:             exps,
+		Educations:              edus,
+		ProfessionalProfiles:    profs,
+		JobTypes:                jobTypes,
+		WorkLocationTypes:       workLocs,
+		Projects:                projects,
+		SentMessages:            sentMsgs,
+		ReceivedMessages:        receivedMsgs,
+		PublicEndorsementsSent:  pubEnd,
+		ProjectEndorsementsSent: projEnd,
+		References:              refs,
+	}
+}
+
 func NewCurrentUserDashboardResponse(user *entities.User) CurrentUserDashboardResponse {
 	return CurrentUserDashboardResponse{
-		Id:                           user.Id,
-		Email:                        user.Email,
-		Firstname:                    user.Firstname,
-		Lastname:                     user.Lastname,
-		PhoneNumber:                  user.PhoneNumber,
-		Birthdate:                    user.Birthdate,
-		Gender:                       user.Gender,
-		ProfilePicturePath:           user.ProfilePicturePath,
-		Title:                        user.Title,
-		City:                         user.City,
-		Skills:                       user.UserSkills,
-		Certificates:                 user.Certificates,
-		Experiences:                  user.Experiences,
-		Educations:                   user.Educations,
-		ProfessionalProfiles:         user.ProfessionalProfiles,
-		JobTypes:                     user.UserJobTypes,
-		WorkLocationTypes:            user.UserWorkLocationTypes,
-		Projects:                     user.Projects,
-		SentMessages:                 user.SentMessages,
-		ReceivedMessages:             user.ReceivedMessages,
-		PublicEndorsementsSent:       user.PublicEndorsementsSent,
-		ProjectEndorsementsSent:      user.ProjectEndorsementsSent,
-		References:                   user.References,
+		DeveloperDashboardResponse:   NewDeveloperDashboardResponse(user),
 		SkillsCount:                  len(user.UserSkills),
 		CertificatesCount:            len(user.Certificates),
 		ExperiencesCount:             len(user.Experiences),
@@ -164,7 +218,6 @@ func calculateProfileCompletePercentage(user *entities.User) float64 {
 
 	// Optional fields (counts)
 	optionalFields := map[string]int{
-		//"bio":      user.BioLength,
 		"skills":       len(user.UserSkills),
 		"experiences":  len(user.Experiences),
 		"education":    len(user.Educations),
@@ -175,7 +228,6 @@ func calculateProfileCompletePercentage(user *entities.User) float64 {
 		"endorsements": len(user.PublicEndorsementsSent) + len(user.ProjectEndorsementsSent),
 	}
 
-	// Calculate percentage
 	filledFields := 0
 	for _, filled := range fields {
 		if filled {
@@ -183,20 +235,11 @@ func calculateProfileCompletePercentage(user *entities.User) float64 {
 		}
 	}
 
-	// Base field percentage (40% max)
 	if len(fields) > 0 {
 		percentage += (float64(filledFields) / float64(len(fields))) * 40.0
 	}
 
-	// Optional fields percentage (60% max)
 	if len(optionalFields) > 0 {
-		// Each optional field contributes equally
-		// But we can give more weight to more important fields
-		// For now, let's give each optional field 3-6% weight
-		// Total optional weight = 60%
-		// Let's spread it across the fields
-		// Skills, experience, education, projects are most important
-
 		weights := map[string]float64{
 			"skills":       6.0,
 			"experience":   6.0,
@@ -211,7 +254,6 @@ func calculateProfileCompletePercentage(user *entities.User) float64 {
 
 		optionalPercentage := 0.0
 		for field, weight := range weights {
-			// Check if field has content
 			var hasContent bool
 			switch field {
 			case "skills":
@@ -239,14 +281,11 @@ func calculateProfileCompletePercentage(user *entities.User) float64 {
 			}
 		}
 
-		// Cap at 60%
 		if optionalPercentage > 60.0 {
 			optionalPercentage = 60.0
 		}
-
 		percentage += optionalPercentage
 	}
 
-	// Round to nearest integer
 	return float64(int(percentage + 0.5))
 }
