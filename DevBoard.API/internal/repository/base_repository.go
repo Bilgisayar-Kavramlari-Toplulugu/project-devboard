@@ -12,6 +12,7 @@ type BaseRepository[T any, ID any] interface {
 	Create(entity *T) error
 	GetByID(id ID) (*T, error)
 	List(limit, offset int) ([]T, error)
+	ListAll() ([]T, error)
 	Update(entity *T) error
 	Delete(id ID) error
 }
@@ -47,11 +48,17 @@ func (r *baseRepository[T, ID]) List(limit, offset int) ([]T, error) {
 	return entities, err
 }
 
+func (r *baseRepository[T, ID]) ListAll() ([]T, error) {
+	var entities []T
+	err := r.db.Order("created_on desc").Find(&entities).Error
+	return entities, err
+}
+
 func (r *baseRepository[T, ID]) Update(entity *T) error {
 	return r.db.Save(entity).Error
 }
 
 func (r *baseRepository[T, ID]) Delete(id ID) error {
 	var entity T
-	return r.db.Delete(&entity, id).Error
+	return r.db.Delete(&entity, "id = ?", id).Error
 }

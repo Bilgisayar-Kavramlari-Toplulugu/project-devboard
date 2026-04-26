@@ -39,6 +39,7 @@ import (
 // @BasePath  /api/v1
 func main() {
 	cfg := config.Load()
+	
 
 	createDatabaseIfNotExists(cfg.DatabaseURL)
 
@@ -48,6 +49,7 @@ func main() {
 	}
 
 	config.RunMigrations(db)
+	config.SeedData(db)
 	db.Use(&db_plugins.TimestampPlugin{})
 
 	v := validator.New()
@@ -56,6 +58,8 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	skillTypeRepo := repository.NewSkillTypeRepository(db)
 	jobTypeRepo := repository.NewJobTypeRepository(db)
+	countryRepo := repository.NewCountryRepository(db)
+	cityRepo := repository.NewCityRepository(db)
 
 	// Services
 	jwtService := services.NewJWTService(cfg, db)
@@ -63,12 +67,16 @@ func main() {
 	userService := services.NewUserService(userRepo)
 	skillTypeService := services.NewSkillTypeService(skillTypeRepo)
 	jobTypeService := services.NewJobTypeService(jobTypeRepo)
+	countryService := services.NewCountryService(countryRepo)
+	cityService := services.NewCityService(cityRepo)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService, v, cfg)
 	userHandler := handler.NewUserHandler(userService, v)
 	skillTypeHandler := handler.NewSkillTypeHandler(skillTypeService, v)
 	jobTypeHandler := handler.NewJobTypeHandler(jobTypeService, v)
+	countryHandler := handler.NewCountryHandler(countryService, v)
+	cityHandler := handler.NewCityHandler(cityService, v)
 
 	// Router
 	r := gin.New()
@@ -100,6 +108,8 @@ func main() {
 		JWTService:       jwtService,
 		SkillTypeHandler: skillTypeHandler,
 		JobTypeHandler:   jobTypeHandler,
+		CountryHandler:   countryHandler,
+		CityHandler:      cityHandler,
 		Config:           cfg,
 	})
 

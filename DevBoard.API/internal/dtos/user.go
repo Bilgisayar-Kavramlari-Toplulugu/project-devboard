@@ -39,7 +39,7 @@ type UserResponse struct {
 	IsActive         bool       `json:"is_active"`
 	Roles            []string   `json:"roles,omitempty"`
 	CreatedOn        time.Time  `json:"created_on"`
-	LastModifiedOn   time.Time  `json:"last_modified_on"`
+	LastModifiedAt   time.Time  `json:"last_modified_on"`
 }
 
 func NewUserResponse(user *entities.User) *UserResponse {
@@ -69,7 +69,7 @@ func NewUserResponse(user *entities.User) *UserResponse {
 		IsActive:         user.BaseEntity.IsActive,
 		Roles:            roles,
 		CreatedOn:        user.BaseEntity.CreatedOn,
-		LastModifiedOn:   user.BaseEntity.LastModifiedOn,
+		LastModifiedAt:   user.BaseEntity.LastModifiedAt,
 	}
 }
 
