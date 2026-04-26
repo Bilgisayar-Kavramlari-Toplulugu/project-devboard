@@ -900,6 +900,124 @@
                 }
             }
         },
+        "/developer/dashboard": {
+            "get": {
+                "description": "Get all profile details for the authenticated developer's dashboard",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "developer-dashboard"
+                ],
+                "summary": "Get developer dashboard data",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dtos.DeveloperDashboardResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/developer/dashboard/{username}": {
+            "get": {
+                "description": "Get all profile details for the authenticated developer's dashboard",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "developer-dashboard"
+                ],
+                "summary": "Get developer dashboard data",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dtos.DeveloperDashboardResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/job-types": {
             "get": {
                 "description": "Get a list of all job types",
@@ -1417,6 +1535,29 @@
         }
     },
     "definitions": {
+        "dtos.CertificateDTO": {
+            "type": "object",
+            "properties": {
+                "degree": {
+                    "type": "string"
+                },
+                "expireDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "issueDate": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.CityCreateRequest": {
             "type": "object",
             "required": [
@@ -1553,6 +1694,162 @@
                 }
             }
         },
+        "dtos.DeveloperDashboardResponse": {
+            "type": "object",
+            "properties": {
+                "birthdate": {
+                    "type": "string"
+                },
+                "certificates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.CertificateDTO"
+                    }
+                },
+                "educations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.EducationDTO"
+                    }
+                },
+                "email": {
+                    "type": "string"
+                },
+                "experiences": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ExperienceDTO"
+                    }
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "jobTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.JobTypeDTO"
+                    }
+                },
+                "lastname": {
+                    "type": "string"
+                },
+                "location": {
+                    "$ref": "#/definitions/dtos.LocationDTO"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "professionalProfiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ProfessionalProfileDTO"
+                    }
+                },
+                "profilePicturePath": {
+                    "type": "string"
+                },
+                "projectEndorsementsSent": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ProjectEndorsementDTO"
+                    }
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ProjectDTO"
+                    }
+                },
+                "publicEndorsementsSent": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.PublicEndorsementDTO"
+                    }
+                },
+                "receivedMessages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.MessageDTO"
+                    }
+                },
+                "references": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ReferenceDTO"
+                    }
+                },
+                "sentMessages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.MessageDTO"
+                    }
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.UserSkillDTO"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "workLocationTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.WorkLocationTypeDTO"
+                    }
+                }
+            }
+        },
+        "dtos.EducationDTO": {
+            "type": "object",
+            "properties": {
+                "gdpr": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "location": {
+                    "$ref": "#/definitions/dtos.LocationDTO"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.ExperienceDTO": {
+            "type": "object",
+            "properties": {
+                "endDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "information": {
+                    "type": "integer"
+                },
+                "location": {
+                    "$ref": "#/definitions/dtos.LocationDTO"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.ForgotPasswordRequest": {
             "type": "object",
             "required": [
@@ -1574,6 +1871,17 @@
                     "type": "string",
                     "maxLength": 500,
                     "minLength": 2
+                }
+            }
+        },
+        "dtos.JobTypeDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1601,14 +1909,32 @@
                 }
             }
         },
+        "dtos.LocationDTO": {
+            "type": "object",
+            "properties": {
+                "cityId": {
+                    "type": "integer"
+                },
+                "cityName": {
+                    "type": "string"
+                },
+                "countryName": {
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Format: CityName, CountryName",
+                    "type": "string"
+                }
+            }
+        },
         "dtos.LoginRequest": {
             "type": "object",
             "required": [
-                "email",
+                "identifier",
                 "password"
             ],
             "properties": {
-                "email": {
+                "identifier": {
                     "type": "string"
                 },
                 "password": {
@@ -1624,6 +1950,150 @@
             ],
             "properties": {
                 "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.MessageDTO": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isHtml": {
+                    "type": "boolean"
+                },
+                "receiverEmailAddress": {
+                    "type": "string"
+                },
+                "receiverId": {
+                    "type": "string"
+                },
+                "senderEmailAddress": {
+                    "type": "string"
+                },
+                "senderId": {
+                    "type": "string"
+                },
+                "sentDate": {
+                    "type": "string"
+                },
+                "subject": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.ProfessionalProfileDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "platformId": {
+                    "type": "integer"
+                },
+                "platformName": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.ProjectDTO": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "shortDescription": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "typeId": {
+                    "type": "integer"
+                },
+                "typeName": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.ProjectEndorsementDTO": {
+            "type": "object",
+            "properties": {
+                "endorsementableId": {
+                    "type": "integer"
+                },
+                "endorsementableName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "senderId": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.PublicEndorsementDTO": {
+            "type": "object",
+            "properties": {
+                "createdDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "senderEmailAddress": {
+                    "type": "string"
+                },
+                "senderUserFirstName": {
+                    "type": "string"
+                },
+                "senderUserId": {
+                    "type": "string"
+                },
+                "senderUserLastName": {
+                    "type": "string"
+                },
+                "userSkillId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dtos.ReferenceDTO": {
+            "type": "object",
+            "properties": {
+                "emailAddress": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastname": {
+                    "type": "string"
+                },
+                "phoneNumber": {
                     "type": "string"
                 }
             }
@@ -1661,7 +2131,8 @@
                 "email",
                 "firstname",
                 "lastname",
-                "password"
+                "password",
+                "username"
             ],
             "properties": {
                 "email": {
@@ -1683,6 +2154,11 @@
                 },
                 "phone_number": {
                     "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 3
                 }
             }
         },
@@ -1692,7 +2168,8 @@
                 "email",
                 "firstname",
                 "lastname",
-                "password"
+                "password",
+                "username"
             ],
             "properties": {
                 "email": {
@@ -1714,6 +2191,11 @@
                 },
                 "phone_number": {
                     "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 3
                 }
             }
         },
@@ -1767,6 +2249,23 @@
                 },
                 "title": {
                     "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.UserSkillDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "skillId": {
+                    "type": "integer"
+                },
+                "skillName": {
+                    "type": "string"
                 }
             }
         },
@@ -1791,6 +2290,17 @@
                     "minLength": 6
                 },
                 "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.WorkLocationTypeDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }

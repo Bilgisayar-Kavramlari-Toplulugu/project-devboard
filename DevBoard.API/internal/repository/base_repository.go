@@ -3,6 +3,8 @@ package repository
 
 import (
 	"errors"
+	"math"
+	"project-devboard/pkg/pagination"
 
 	"gorm.io/gorm"
 )
@@ -11,10 +13,10 @@ import (
 type BaseRepository[T any, ID any] interface {
 	Create(entity *T) error
 	GetByID(id ID) (*T, error)
-	List(limit, offset int) ([]T, error)
 	ListAll() ([]T, error)
 	Update(entity *T) error
 	Delete(id ID) error
+	PaginatedList(page, pageSize int) (*pagination.PaginatedResult[T], error)
 }
 
 type baseRepository[T any, ID any] struct {
@@ -61,4 +63,42 @@ func (r *baseRepository[T, ID]) Update(entity *T) error {
 func (r *baseRepository[T, ID]) Delete(id ID) error {
 	var entity T
 	return r.db.Delete(&entity, "id = ?", id).Error
+}
+func (r *baseRepository[T, ID]) PaginatedList(page, pageSize int) (*pagination.PaginatedResult[T], error) {
+	var entities []T
+	var total int64
+
+	if err := r.db.Model(new(T)).Count(&total).Error; err != nil {
+		return nil, err
+	}
+
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	if pageSize > 1000 {
+        pageSize = 1000
+    }
+
+	offset := (page - 1) * pageSize
+
+	err := r.db.Order("created_at desc").
+		Limit(pageSize).
+		Offset(offset).
+		Find(&entities).Error
+	if err != nil {
+		return nil, err
+	}
+
+	totalPages := int(math.Ceil(float64(total) / float64(pageSize)))
+
+	return &pagination.PaginatedResult[T]{
+		Data:       entities,
+		Total:      total,
+		Page:       page,
+		PageSize:   pageSize,
+		TotalPages: totalPages,
+	}, nil
 }
