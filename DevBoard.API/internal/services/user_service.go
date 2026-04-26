@@ -30,7 +30,7 @@ func NewUserService(repo repository.UserRepository) UserService {
 }
 
 func (s *userService) CreateUser(ctx context.Context, req dtos.UserCreateRequest, actorID uuid.UUID) (*entities.User, error) {
-	existing, err := s.repo.GetByEmail(req.Email)
+	existing, err := s.repo.GetByIdentifier(req.Email)
 	if err != nil {
 		return nil, apperrors.Wrap(apperrors.InternalError, apperrors.ErrInternalServer, err)
 	}
@@ -98,7 +98,7 @@ func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, req dtos.Use
 	}
 
 	if req.Email != nil {
-		emailOwner, err := s.repo.GetByEmail(*req.Email)
+		emailOwner, err := s.repo.GetByIdentifier(*req.Email)
 		if err != nil {
 			return nil, apperrors.Wrap(apperrors.InternalError, apperrors.ErrInternalServer, err)
 		}

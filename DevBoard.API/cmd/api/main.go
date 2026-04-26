@@ -57,6 +57,7 @@ func main() {
 	// Repositories
 	userRepo := repository.NewUserRepository(db)
 	skillTypeRepo := repository.NewSkillTypeRepository(db)
+	developerDashboardRepo := repository.NewDeveloperDashboardRepository(db)
 	jobTypeRepo := repository.NewJobTypeRepository(db)
 	countryRepo := repository.NewCountryRepository(db)
 	cityRepo := repository.NewCityRepository(db)
@@ -66,6 +67,7 @@ func main() {
 	authService := services.NewAuthService(db, userRepo, jwtService, cfg)
 	userService := services.NewUserService(userRepo)
 	skillTypeService := services.NewSkillTypeService(skillTypeRepo)
+	developerDashboardService := services.NewDeveloperDashboardService(developerDashboardRepo)
 	jobTypeService := services.NewJobTypeService(jobTypeRepo)
 	countryService := services.NewCountryService(countryRepo)
 	cityService := services.NewCityService(cityRepo)
@@ -74,6 +76,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService, v, cfg)
 	userHandler := handler.NewUserHandler(userService, v)
 	skillTypeHandler := handler.NewSkillTypeHandler(skillTypeService, v)
+	developerDashboardHandler := handler.NewDeveloperDashboardHandler(developerDashboardService)
 	jobTypeHandler := handler.NewJobTypeHandler(jobTypeService, v)
 	countryHandler := handler.NewCountryHandler(countryService, v)
 	cityHandler := handler.NewCityHandler(cityService, v)
@@ -110,6 +113,7 @@ func main() {
 		JobTypeHandler:   jobTypeHandler,
 		CountryHandler:   countryHandler,
 		CityHandler:      cityHandler,
+		DeveloperDashboardHandler: developerDashboardHandler,
 		Config:           cfg,
 	})
 

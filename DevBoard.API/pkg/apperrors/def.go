@@ -21,4 +21,6 @@ var (
 	// User
 	ErrUserNotFound      = ErrorDef{Code: "USER_NOT_FOUND", Message: "User not found"}
 	ErrUserAlreadyExists = ErrorDef{Code: "USER_ALREADY_EXISTS", Message: "User already exists"}
+	ErrInvalidUserID     = ErrorDef{Code: "INVALID_USER_ID", Message: "Invalid user ID"}
+	ErrInvalidUUID       = ErrorDef{Code: "INVALID_UUID", Message: "Invalid UUID"}
 )
