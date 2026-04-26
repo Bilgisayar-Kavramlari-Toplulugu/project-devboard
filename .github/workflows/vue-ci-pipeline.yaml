@@ -6,6 +6,7 @@ on:
     paths:
       - "DevBoard.WebUI/**"
 
+
 jobs:
   lint:
     runs-on: ubuntu-latest

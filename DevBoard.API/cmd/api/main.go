@@ -55,6 +55,7 @@ func main() {
 	// Repositories
 	userRepo := repository.NewUserRepository(db)
 	skillTypeRepo := repository.NewSkillTypeRepository(db)
+	developerDashboardRepo := repository.NewDeveloperDashboardRepository(db)
 	jobTypeRepo := repository.NewJobTypeRepository(db)
 
 	// Services
@@ -62,12 +63,14 @@ func main() {
 	authService := services.NewAuthService(db, userRepo, jwtService, cfg)
 	userService := services.NewUserService(userRepo)
 	skillTypeService := services.NewSkillTypeService(skillTypeRepo)
+	developerDashboardService := services.NewDeveloperDashboardService(developerDashboardRepo)
 	jobTypeService := services.NewJobTypeService(jobTypeRepo)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService, v, cfg)
 	userHandler := handler.NewUserHandler(userService, v)
 	skillTypeHandler := handler.NewSkillTypeHandler(skillTypeService, v)
+	developerDashboardHandler := handler.NewDeveloperDashboardHandler(developerDashboardService)
 	jobTypeHandler := handler.NewJobTypeHandler(jobTypeService, v)
 
 	// Router
@@ -100,6 +103,7 @@ func main() {
 		JWTService:       jwtService,
 		SkillTypeHandler: skillTypeHandler,
 		JobTypeHandler:   jobTypeHandler,
+		DeveloperDashboardHandler: developerDashboardHandler,
 		Config:           cfg,
 	})
 
