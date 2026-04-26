@@ -1,5 +1,20 @@
 basePath: /api/v1
 definitions:
+  dtos.CertificateDTO:
+    properties:
+      degree:
+        type: string
+      expireDate:
+        type: string
+      id:
+        type: integer
+      issueDate:
+        type: string
+      name:
+        type: string
+      url:
+        type: string
+    type: object
   dtos.CityCreateRequest:
     properties:
       code:
@@ -95,6 +110,109 @@ definitions:
         maxLength: 500
         type: string
     type: object
+  dtos.DeveloperDashboardResponse:
+    properties:
+      birthdate:
+        type: string
+      certificates:
+        items:
+          $ref: '#/definitions/dtos.CertificateDTO'
+        type: array
+      educations:
+        items:
+          $ref: '#/definitions/dtos.EducationDTO'
+        type: array
+      email:
+        type: string
+      experiences:
+        items:
+          $ref: '#/definitions/dtos.ExperienceDTO'
+        type: array
+      firstname:
+        type: string
+      gender:
+        type: integer
+      id:
+        type: string
+      jobTypes:
+        items:
+          $ref: '#/definitions/dtos.JobTypeDTO'
+        type: array
+      lastname:
+        type: string
+      location:
+        $ref: '#/definitions/dtos.LocationDTO'
+      phoneNumber:
+        type: string
+      professionalProfiles:
+        items:
+          $ref: '#/definitions/dtos.ProfessionalProfileDTO'
+        type: array
+      profilePicturePath:
+        type: string
+      projectEndorsementsSent:
+        items:
+          $ref: '#/definitions/dtos.ProjectEndorsementDTO'
+        type: array
+      projects:
+        items:
+          $ref: '#/definitions/dtos.ProjectDTO'
+        type: array
+      publicEndorsementsSent:
+        items:
+          $ref: '#/definitions/dtos.PublicEndorsementDTO'
+        type: array
+      receivedMessages:
+        items:
+          $ref: '#/definitions/dtos.MessageDTO'
+        type: array
+      references:
+        items:
+          $ref: '#/definitions/dtos.ReferenceDTO'
+        type: array
+      sentMessages:
+        items:
+          $ref: '#/definitions/dtos.MessageDTO'
+        type: array
+      skills:
+        items:
+          $ref: '#/definitions/dtos.UserSkillDTO'
+        type: array
+      title:
+        type: string
+      workLocationTypes:
+        items:
+          $ref: '#/definitions/dtos.WorkLocationTypeDTO'
+        type: array
+    type: object
+  dtos.EducationDTO:
+    properties:
+      gdpr:
+        type: number
+      id:
+        type: integer
+      location:
+        $ref: '#/definitions/dtos.LocationDTO'
+      name:
+        type: string
+    type: object
+  dtos.ExperienceDTO:
+    properties:
+      endDate:
+        type: string
+      id:
+        type: integer
+      information:
+        type: integer
+      location:
+        $ref: '#/definitions/dtos.LocationDTO'
+      name:
+        type: string
+      position:
+        type: string
+      startDate:
+        type: string
+    type: object
   dtos.ForgotPasswordRequest:
     properties:
       email:
@@ -110,6 +228,13 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  dtos.JobTypeDTO:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
     type: object
   dtos.JobTypeResponse:
     properties:
@@ -127,15 +252,27 @@ definitions:
     required:
     - name
     type: object
+  dtos.LocationDTO:
+    properties:
+      cityId:
+        type: integer
+      cityName:
+        type: string
+      countryName:
+        type: string
+      name:
+        description: 'Format: CityName, CountryName'
+        type: string
+    type: object
   dtos.LoginRequest:
     properties:
-      email:
+      identifier:
         type: string
       password:
         minLength: 6
         type: string
     required:
-    - email
+    - identifier
     - password
     type: object
   dtos.LogoutRequest:
@@ -144,6 +281,100 @@ definitions:
         type: string
     required:
     - refresh_token
+    type: object
+  dtos.MessageDTO:
+    properties:
+      body:
+        type: string
+      id:
+        type: integer
+      isHtml:
+        type: boolean
+      receiverEmailAddress:
+        type: string
+      receiverId:
+        type: string
+      senderEmailAddress:
+        type: string
+      senderId:
+        type: string
+      sentDate:
+        type: string
+      subject:
+        type: string
+    type: object
+  dtos.ProfessionalProfileDTO:
+    properties:
+      id:
+        type: integer
+      platformId:
+        type: integer
+      platformName:
+        type: string
+      url:
+        type: string
+    type: object
+  dtos.ProjectDTO:
+    properties:
+      description:
+        type: string
+      endDate:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      shortDescription:
+        type: string
+      startDate:
+        type: string
+      typeId:
+        type: integer
+      typeName:
+        type: string
+      url:
+        type: string
+    type: object
+  dtos.ProjectEndorsementDTO:
+    properties:
+      endorsementableId:
+        type: integer
+      endorsementableName:
+        type: string
+      id:
+        type: integer
+      senderId:
+        type: string
+    type: object
+  dtos.PublicEndorsementDTO:
+    properties:
+      createdDate:
+        type: string
+      id:
+        type: integer
+      senderEmailAddress:
+        type: string
+      senderUserFirstName:
+        type: string
+      senderUserId:
+        type: string
+      senderUserLastName:
+        type: string
+      userSkillId:
+        type: integer
+    type: object
+  dtos.ReferenceDTO:
+    properties:
+      emailAddress:
+        type: string
+      firstname:
+        type: string
+      id:
+        type: integer
+      lastname:
+        type: string
+      phoneNumber:
+        type: string
     type: object
   dtos.RefreshTokenRequest:
     properties:
@@ -180,11 +411,16 @@ definitions:
         type: string
       phone_number:
         type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
     required:
     - email
     - firstname
     - lastname
     - password
+    - username
     type: object
   dtos.UserCreateRequest:
     properties:
@@ -203,11 +439,16 @@ definitions:
         type: string
       phone_number:
         type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
     required:
     - email
     - firstname
     - lastname
     - password
+    - username
     type: object
   dtos.UserResponse:
     properties:
@@ -243,6 +484,17 @@ definitions:
         type: array
       title:
         type: string
+      username:
+        type: string
+    type: object
+  dtos.UserSkillDTO:
+    properties:
+      id:
+        type: integer
+      skillId:
+        type: integer
+      skillName:
+        type: string
     type: object
   dtos.UserUpdateRequest:
     properties:
@@ -260,6 +512,13 @@ definitions:
         minLength: 6
         type: string
       phone_number:
+        type: string
+    type: object
+  dtos.WorkLocationTypeDTO:
+    properties:
+      id:
+        type: integer
+      name:
         type: string
     type: object
   handler.MessageEnvelope:
@@ -873,6 +1132,78 @@ paths:
       summary: Get all countries alphabetically
       tags:
       - Countries
+  /developer/dashboard:
+    get:
+      consumes:
+      - application/json
+      description: Get all profile details for the authenticated developer's dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.DeveloperDashboardResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get developer dashboard data
+      tags:
+      - developer-dashboard
+  /developer/dashboard/{username}:
+    get:
+      consumes:
+      - application/json
+      description: Get all profile details for the authenticated developer's dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.DeveloperDashboardResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get developer dashboard data
+      tags:
+      - developer-dashboard
   /job-types:
     get:
       description: Get a list of all job types

@@ -60,7 +60,7 @@ func (s *cityService) GetCityById(id int) (*entities.City, error) {
 }
 
 func (s *cityService) GetAllCities() ([]entities.City, error) {
-	return s.repo.List(1000, 0)
+	return s.repo.ListAll()
 }
 
 func (s *cityService) GetCitiesByCountryId(countryId int) ([]entities.City, error) {

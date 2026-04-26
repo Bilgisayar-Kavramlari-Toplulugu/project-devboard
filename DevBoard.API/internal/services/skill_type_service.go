@@ -50,8 +50,7 @@ func (s *skillTypeService) GetSkillTypeById(id int) (*entities.SkillType, error)
 }
 
 func (s *skillTypeService) GetAllSkillTypes() ([]entities.SkillType, error) {
-	//TODO: base repo içerisine ListAll fonksiyonu geldiğinde değiştirilecek
-	return s.repo.List(1000, 0)
+	return s.repo.ListAll()
 }
 
 func (s *skillTypeService) UpdateSkillType(id int, name string) error {

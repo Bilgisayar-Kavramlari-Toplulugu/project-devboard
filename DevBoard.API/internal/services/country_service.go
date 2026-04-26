@@ -55,7 +55,7 @@ func (s *countryService) GetCountryById(id int) (*entities.Country, error) {
 }
 
 func (s *countryService) GetAllCountries() ([]entities.Country, error) {
-	return s.repo.List(1000, 0)
+	return s.repo.ListAll()
 }
 
 func (s *countryService) GetAllCountriesAlphabetical() ([]entities.Country, error) {
