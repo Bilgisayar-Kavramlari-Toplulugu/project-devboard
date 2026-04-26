@@ -56,6 +56,7 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	skillTypeRepo := repository.NewSkillTypeRepository(db)
 	developerDashboardRepo := repository.NewDeveloperDashboardRepository(db)
+	jobTypeRepo := repository.NewJobTypeRepository(db)
 
 	// Services
 	jwtService := services.NewJWTService(cfg, db)
@@ -63,12 +64,14 @@ func main() {
 	userService := services.NewUserService(userRepo)
 	skillTypeService := services.NewSkillTypeService(skillTypeRepo)
 	developerDashboardService := services.NewDeveloperDashboardService(developerDashboardRepo)
+	jobTypeService := services.NewJobTypeService(jobTypeRepo)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService, v, cfg)
 	userHandler := handler.NewUserHandler(userService, v)
 	skillTypeHandler := handler.NewSkillTypeHandler(skillTypeService, v)
 	developerDashboardHandler := handler.NewDeveloperDashboardHandler(developerDashboardService)
+	jobTypeHandler := handler.NewJobTypeHandler(jobTypeService, v)
 
 	// Router
 	r := gin.New()
@@ -94,13 +97,14 @@ func main() {
 	}))
 
 	routes.SetupRoutes(r, &routes.RouteConfig{
-		DB:                        db,
-		UserHandler:               userHandler,
-		AuthHandler:               authHandler,
-		JWTService:                jwtService,
-		SkillTypeHandler:          skillTypeHandler,
+		DB:               db,
+		UserHandler:      userHandler,
+		AuthHandler:      authHandler,
+		JWTService:       jwtService,
+		SkillTypeHandler: skillTypeHandler,
+		JobTypeHandler:   jobTypeHandler,
 		DeveloperDashboardHandler: developerDashboardHandler,
-		Config:                    cfg,
+		Config:           cfg,
 	})
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
