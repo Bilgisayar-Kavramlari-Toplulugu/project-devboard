@@ -13,6 +13,8 @@ var (
 	ErrNotFound         = ErrorDef{Code: "NOT_FOUND", Message: "Resource not found"}
 	ErrInternalServer   = ErrorDef{Code: "INTERNAL_SERVER_ERROR", Message: "Internal server error"}
 	ErrValidationFailed = ErrorDef{Code: "VALIDATION_FAILED", Message: "Validation failed"}
+	//Burada ErrBadRequest oluşturdum fakat ErrorDef kısmının silinmesi gerektiğini düşünüyorum kodu test edebilmek için oluşturdum
+	ErrBadRequest = ErrorDef{Code: "BAD_REQUEST", Message: "Bad request"}
 
 	// Auth
 	ErrInvalidCredentials = ErrorDef{Code: "INVALID_CREDENTIALS", Message: "Invalid email or password"}
