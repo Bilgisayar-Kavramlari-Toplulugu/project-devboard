@@ -51,7 +51,7 @@ func (s *jobTypeService) GetJobTypeById(id int) (*entities.JobType, error) {
 }
 
 func (s *jobTypeService) GetAllJobTypes() ([]entities.JobType, error) {
-	return s.repo.List(1000, 0)
+	return s.repo.ListAll()
 }
 
 func (s *jobTypeService) UpdateJobType(id int, name string) error {

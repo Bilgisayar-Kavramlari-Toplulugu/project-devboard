@@ -100,7 +100,7 @@ dist
 
 # Sveltekit cache directory
 .svelte-kit/
-
+Devboard.API/docs/
 # vitepress build output
 **/.vitepress/dist
 

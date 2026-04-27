@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"project-devboard/internal/domain/entities"
 
 	"github.com/google/uuid"
@@ -11,6 +12,14 @@ var SystemUserID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
 
 func SeedData(db *gorm.DB) {
 	seedJobTypes(db)
+	seedCountries(db)
+	seedCities(db)
+}
+
+func isSeeded(db *gorm.DB, model interface{}) bool {
+    var count int64
+    db.Model(model).Count(&count)
+    return count > 0
 }
 
 func seedJobTypes(db *gorm.DB) {
@@ -30,4 +39,28 @@ func seedJobTypes(db *gorm.DB) {
 			db.Create(&jt)
 		}
 	}
+	
+}
+func seedCountries(db *gorm.DB) {
+    if isSeeded(db, &entities.Country{}) {
+        return
+    }
+    log.Println("🌱 Seeding countries...")
+    data := getCountrySeedData()
+    if err := db.CreateInBatches(data, 50).Error; err != nil {
+        log.Printf("❌ Country seed error: %v\n", err)
+    }
+    log.Printf("✅ %d countries seeded\n", len(data))
+}
+
+func seedCities(db *gorm.DB) {
+    if isSeeded(db, &entities.City{}) {
+        return
+    }
+    log.Println("🌱 Seeding cities...")
+    data := getCitySeedData()
+    if err := db.CreateInBatches(data, 100).Error; err != nil {
+        log.Printf("❌ City seed error: %v\n", err)
+    }
+    log.Printf("✅ %d cities seeded\n", len(data))
 }

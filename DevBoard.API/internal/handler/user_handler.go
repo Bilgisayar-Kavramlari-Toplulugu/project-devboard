@@ -101,15 +101,15 @@ func (h *UserHandler) GetByID(c *gin.Context) {
 // @Failure      500     {object}  response.Response  "Internal Server Error"
 // @Router       /users [get]
 func (h *UserHandler) List(c *gin.Context) {
-	limit, offset := paginationParams(c)
+	page, pageSize := paginationParams(c)
 
-	users, err := h.service.ListUsers(limit, offset)
+	userList, err := h.service.ListUsers(page, pageSize)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	response.Success(c, http.StatusOK, dtos.NewUserResponses(users))
+	response.Success(c, http.StatusOK,userList)
 }
 
 // Update godoc

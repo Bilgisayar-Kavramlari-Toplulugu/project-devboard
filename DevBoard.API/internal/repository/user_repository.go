@@ -11,8 +11,8 @@ import (
 
 type UserRepository interface {
 	BaseRepository[domain.User, uuid.UUID]
-	GetByEmail(email string) (*domain.User, error)
-	GetByEmailWithRoles(email string) (*domain.User, error)
+	GetByIdentifier(identifier string) (*domain.User, error)
+	GetByIdentifierWithRoles(identifier string) (*domain.User, error)
 	WithTx(tx *gorm.DB) UserRepository
 }
 
@@ -35,9 +35,9 @@ func (r *userRepository) WithTx(tx *gorm.DB) UserRepository {
 	}
 }
 
-func (r *userRepository) GetByEmail(email string) (*domain.User, error) {
+func (r *userRepository) GetByIdentifier(identifier string) (*domain.User, error) {
 	var user domain.User
-	err := r.db.Where("email = ?", email).First(&user).Error
+	err := r.db.Where("email = ? OR username = ?", identifier, identifier).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -47,9 +47,9 @@ func (r *userRepository) GetByEmail(email string) (*domain.User, error) {
 	return &user, nil
 }
 
-func (r *userRepository) GetByEmailWithRoles(email string) (*domain.User, error) {
+func (r *userRepository) GetByIdentifierWithRoles(identifier string) (*domain.User, error) {
 	var user domain.User
-	err := r.db.Preload("UserRoles.Role").Where("email = ?", email).First(&user).Error
+	err := r.db.Preload("UserRoles.Role").Where("email = ? OR username = ?", identifier, identifier).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil

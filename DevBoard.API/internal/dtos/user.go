@@ -9,6 +9,7 @@ import (
 )
 
 type UserCreateRequest struct {
+	Username    string  `json:"username" validate:"required,min=3,max=50,alphanum"`
 	Email       string  `json:"email" validate:"required,email"`
 	Password    string  `json:"password" validate:"required,min=6"`
 	Firstname   string  `json:"firstname" validate:"required,min=2,max=100"`
@@ -26,6 +27,7 @@ type UserUpdateRequest struct {
 
 type UserResponse struct {
 	ID               uuid.UUID  `json:"id"`
+	Username         string     `json:"username"`
 	Email            string     `json:"email"`
 	Firstname        string     `json:"firstname"`
 	Lastname         string     `json:"lastname"`
@@ -39,7 +41,7 @@ type UserResponse struct {
 	IsActive         bool       `json:"is_active"`
 	Roles            []string   `json:"roles,omitempty"`
 	CreatedOn        time.Time  `json:"created_on"`
-	LastModifiedOn   time.Time  `json:"last_modified_on"`
+	LastModifiedAt   time.Time  `json:"last_modified_on"`
 }
 
 func NewUserResponse(user *entities.User) *UserResponse {
@@ -56,6 +58,7 @@ func NewUserResponse(user *entities.User) *UserResponse {
 
 	return &UserResponse{
 		ID:               user.Id,
+		Username:         user.Username,
 		Email:            user.Email,
 		Firstname:        user.Firstname,
 		Lastname:         user.Lastname,
@@ -69,7 +72,7 @@ func NewUserResponse(user *entities.User) *UserResponse {
 		IsActive:         user.BaseEntity.IsActive,
 		Roles:            roles,
 		CreatedOn:        user.BaseEntity.CreatedOn,
-		LastModifiedOn:   user.BaseEntity.LastModifiedOn,
+		LastModifiedAt:   user.BaseEntity.LastModifiedAt,
 	}
 }
 
