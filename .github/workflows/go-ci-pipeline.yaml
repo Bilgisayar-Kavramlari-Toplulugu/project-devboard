@@ -1,69 +1,126 @@
-name: Go CI Pipeline
+name: Go Backend CI
 
 on:
   push:
     branches: ["develop"]
+    paths:
+      - "DevBoard.API/**"
   pull_request:
     branches: ["develop"]
+    paths:
+      - "DevBoard.API/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  COVERAGE_THRESHOLD: 70
 
 jobs:
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    defaults:
+      run:
+        working-directory: DevBoard.API
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
+
+      - name: Cache Go Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-gomod-${{ hashFiles('DevBoard.API/go.sum') }}
+
+      - name: Cache Go Build
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/go-build
+          key: ${{ runner.os }}-gobuild-${{ hashFiles('DevBoard.API/go.sum') }}
+
+      - name: Check Formatting
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "Format hatası!"
+            gofmt -d .
+            exit 1
+          fi
 
       - name: Install golangci-lint
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s latest
-          sudo mv ./bin/golangci-lint /usr/local/bin/
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
-      - name: Run linter
+      - name: Run Linter
         run: golangci-lint run ./...
 
   test:
     name: Test
-    runs-on: ubuntu-latest
     needs: lint
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: DevBoard.API
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
 
-      - name: Download dependencies
-        run: go mod download
+      - name: Run Tests
+        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
 
-      - name: Run tests
-        run: go test ./... -v -cover
+      - name: Enforce Coverage
+        run: |
+          COVERAGE=$(go tool cover -func=coverage.txt | grep total | awk '{print $3}' | sed 's/%//')
+          echo "Coverage: $COVERAGE%"
+
+          if (( $(echo "$COVERAGE < $COVERAGE_THRESHOLD" | bc -l) )); then
+            echo "Coverage düşük!"
+            exit 1
+          fi
 
   build:
     name: Build
-    runs-on: ubuntu-latest
     needs: test
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: DevBoard.API
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
 
-      - name: Download dependencies
-        run: go mod download
+      - name: Build binaries
+        run: |
+          mkdir -p build
 
-      - name: Build application
-        run: go build -o app ./...
+          PKGS=$(go list -f '{{if eq .Name "main"}}{{.ImportPath}}{{end}}' ./... | grep -v '^$')
+
+          for pkg in $PKGS; do
+            name=$(basename $pkg)
+            echo "Building $pkg -> $name"
+            CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o build/$name $pkg
+          done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-binaries
+          path: DevBoard.API/build
