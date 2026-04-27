@@ -14,7 +14,7 @@ on:
       - ".github/workflows/**"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -41,16 +41,12 @@ jobs:
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-gomod-${{ hashFiles('DevBoard.API/go.sum', 'DevBoard.API/go.mod') }}
-          restore-keys: |
-            ${{ runner.os }}-gomod-
 
       - name: Cache Go Build
         uses: actions/cache@v4
         with:
           path: ~/.cache/go-build
           key: ${{ runner.os }}-gobuild-${{ hashFiles('DevBoard.API/go.sum', 'DevBoard.API/go.mod') }}
-          restore-keys: |
-            ${{ runner.os }}-gobuild-
 
       - name: Check Formatting
         run: |
@@ -60,11 +56,11 @@ jobs:
             exit 1
           fi
 
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: v1.57.2
-          working-directory: DevBoard.API
+      - name: Run Lint
+        working-directory: DevBoard.API
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          golangci-lint run ./...
 
   test:
     name: Test
@@ -82,7 +78,7 @@ jobs:
         with:
           go-version: "1.22"
 
-      - name: Install dependencies
+      - name: Install deps
         run: sudo apt-get update && sudo apt-get install -y bc
 
       - name: Run Tests
@@ -90,7 +86,7 @@ jobs:
 
       - name: Enforce Coverage
         run: |
-          COVERAGE=$(go tool cover -func=coverage.txt | grep total | awk '{print $3}' | sed 's/%//')
+          COVERAGE=$(go tool cover -func=coverage.txt | awk '/total/ {print $3}' | sed 's/%//')
 
           echo "Coverage: $COVERAGE%"
 
@@ -131,15 +127,20 @@ jobs:
         run: |
           mkdir -p build
 
-          for dir in cmd/*/; do
-            [ -d "$dir" ] || continue
+          if [ -d "cmd" ]; then
+            for dir in cmd/*/; do
+              [ -d "$dir" ] || continue
 
-            name=$(basename $dir)
-            echo "Building $dir -> $name"
+              name=$(basename $dir)
+              echo "Building $dir -> $name"
 
-            CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-            go build -ldflags="-s -w" -o build/$name ./$dir
-          done
+              CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+              go build -ldflags="-s -w" -o build/$name ./$dir
+            done
+          else
+            echo "cmd directory not found, building default package"
+            go build -ldflags="-s -w" -o build/app .
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
