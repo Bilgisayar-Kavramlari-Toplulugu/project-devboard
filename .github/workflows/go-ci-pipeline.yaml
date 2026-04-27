@@ -1,4 +1,4 @@
-name: DevBoard CI
+name: Go CI Pipeline
 
 on:
   push:
@@ -82,6 +82,9 @@ jobs:
         with:
           go-version: "1.22"
 
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y bc
+
       - name: Run Tests
         run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
 
@@ -112,11 +115,25 @@ jobs:
         with:
           go-version: "1.22"
 
+      - name: Cache Go Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-gomod-${{ hashFiles('DevBoard.API/go.sum', 'DevBoard.API/go.mod') }}
+
+      - name: Cache Go Build
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/go-build
+          key: ${{ runner.os }}-gobuild-${{ hashFiles('DevBoard.API/go.sum', 'DevBoard.API/go.mod') }}
+
       - name: Build binaries
         run: |
           mkdir -p build
 
-          for dir in $(find cmd -maxdepth 1 -mindepth 1 -type d); do
+          for dir in cmd/*/; do
+            [ -d "$dir" ] || continue
+
             name=$(basename $dir)
             echo "Building $dir -> $name"
 
