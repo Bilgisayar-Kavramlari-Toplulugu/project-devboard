@@ -29,19 +29,19 @@ jobs:
       run:
         working-directory: DevBoard.API
 
-steps:
-  - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  - uses: actions/setup-go@v5
-    with:
-      go-version: "1.22"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
 
-  - name: Run Lint
-    uses: golangci/golangci-lint-action@v6
-    with:
-      version: v1.57.2
-      args: ./...
-      
+      - name: Run Lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.57.2
+          args: ./...
+
   test:
     name: Test
     runs-on: ubuntu-latest
