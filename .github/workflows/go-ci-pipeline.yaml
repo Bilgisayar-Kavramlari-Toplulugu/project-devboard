@@ -1,11 +1,6 @@
 name: Go CI Pipeline
 
 on:
-  push:
-    branches: ["develop"]
-    paths:
-      - "DevBoard.API/**"
-
   pull_request:
     branches: ["develop"]
     paths:
