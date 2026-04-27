@@ -5,13 +5,11 @@ on:
     branches: ["develop"]
     paths:
       - "DevBoard.API/**"
-      - ".github/workflows/**"
 
   pull_request:
     branches: ["develop"]
     paths:
       - "DevBoard.API/**"
-      - ".github/workflows/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
