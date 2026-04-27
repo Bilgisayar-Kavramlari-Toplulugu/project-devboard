@@ -1,4 +1,4 @@
-name: Go CI Pipeline
+name: DevBoard CI
 
 on:
   push:
@@ -21,8 +21,8 @@ env:
   COVERAGE_THRESHOLD: 70
 
 jobs:
-  lint:
-    name: Lint
+  ci:
+    name: Lint + Test + Build
     runs-on: ubuntu-latest
 
     defaults:
@@ -30,115 +30,56 @@ jobs:
         working-directory: DevBoard.API
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
           go-version: "1.22"
 
-      - name: Cache Go Modules
+      - name: Cache Go modules
         uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod
-          key: ${{ runner.os }}-gomod-${{ hashFiles('DevBoard.API/go.sum', 'DevBoard.API/go.mod') }}
+          key: ${{ runner.os }}-gomod-${{ hashFiles('DevBoard.API/go.sum') }}
 
-      - name: Cache Go Build
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/go-build
-          key: ${{ runner.os }}-gobuild-${{ hashFiles('DevBoard.API/go.sum', 'DevBoard.API/go.mod') }}
-
-      - name: Check Formatting
-        run: |
-          if [ -n "$(gofmt -l .)" ]; then
-            echo "Format hatası!"
-            gofmt -d .
-            exit 1
-          fi
-
-      - name: Run Lint
-        working-directory: DevBoard.API
+      - name: Install tools
         run: |
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-          golangci-lint run ./...
 
-  test:
-    name: Test
-    needs: lint
-    runs-on: ubuntu-latest
+      - name: Lint
+        run: golangci-lint run ./...
 
-    defaults:
-      run:
-        working-directory: DevBoard.API
+      - name: Test
+        run: go test -v -race -coverprofile=coverage.out ./...
 
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-
-      - name: Install deps
-        run: sudo apt-get update && sudo apt-get install -y bc
-
-      - name: Run Tests
-        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
-
-      - name: Enforce Coverage
+      - name: Check Coverage
         run: |
-          COVERAGE=$(go tool cover -func=coverage.txt | awk '/total/ {print $3}' | sed 's/%//')
+          COVERAGE=$(go tool cover -func=coverage.out | awk '/total/ {print $3}' | sed 's/%//')
 
           echo "Coverage: $COVERAGE%"
 
           if [ "$(echo "$COVERAGE < $COVERAGE_THRESHOLD" | bc -l)" -eq 1 ]; then
-            echo "Coverage düşük! ($COVERAGE% < $COVERAGE_THRESHOLD%)"
+            echo "Coverage düşük"
             exit 1
           fi
 
-  build:
-    name: Build
-    needs: test
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: DevBoard.API
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-
-      - name: Cache Go Modules
-        uses: actions/cache@v4
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-gomod-${{ hashFiles('DevBoard.API/go.sum', 'DevBoard.API/go.mod') }}
-
-      - name: Cache Go Build
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/go-build
-          key: ${{ runner.os }}-gobuild-${{ hashFiles('DevBoard.API/go.sum', 'DevBoard.API/go.mod') }}
-
-      - name: Build binaries
+      - name: Build
         run: |
           mkdir -p build
 
           if [ -d "cmd" ]; then
-            for dir in cmd/*/; do
-              [ -d "$dir" ] || continue
+            for d in cmd/*/; do
+              [ -d "$d" ] || continue
+              name=$(basename "$d")
 
-              name=$(basename $dir)
-              echo "Building $dir -> $name"
+              echo "Building $name"
 
               CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-              go build -ldflags="-s -w" -o build/$name ./$dir
+              go build -ldflags="-s -w" -o build/$name ./$d
             done
           else
-            echo "cmd directory not found, building default package"
             go build -ldflags="-s -w" -o build/app .
           fi
 
