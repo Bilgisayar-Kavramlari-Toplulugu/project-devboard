@@ -3,31 +3,23 @@
 <div align="center">
 
 [![GitHub](https://img.shields.io/badge/GitHub-Bilgisayar-Kavramlari-Toplulugu-181717?style=flat-square&logo=github)](https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard)
-# 🖥️ DevBoard
-
-Projelerini sergile, yeteneklerini göster ve keşfet!
-
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?style=flat-square&logo=postgresql)](https://www.postgresql.org)
-[![GoLang](https://img.shields.io/badge/GO-1.25-007d9c?style=flat-square&logo=go)](https://go.dev/)
-[![Vue 3](https://img.shields.io/badge/Vue-3-42b883?style=flat-square&logo=vue)](https://vuejs.org/)
-<br>
-[![GitHub](https://img.shields.io/badge/GitHub-Bilgisayar--Kavramlari--Toplulugu-181717?style=flat-square&logo=github)](https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 **Part of [Projelerini sergile, yeteneklerini göster ve keşfet!](docs/Project-Definition.md)**
-**Part of [Bilgisayar Kavramları Topluluğu](https://github.com/Bilgisayar-Kavramlari-Toplulugu)**
 
 </div>
 
+---
+
+<details open>
+<summary><strong>🇹🇷 Türkçe</strong></summary>
 
 <br>
 
 > **ÖNEMLİ:** Bu repository **Projelerini sergile, yeteneklerini göster ve keşfet!** projesinin bir parçasıdır. Proje hakkında detaylı bilgi için [`docs/Project-Definition.md`](docs/Project-Definition.md) dosyasına bakın.
-> **ÖNEMLİ:** Bu repository **DevBoard** projesinin bir parçasıdır. Proje hakkında detaylı bilgi için [`docs/Project-Definition.md`](docs/Project-Definition.md) dosyasına bakın.
 
 ## 📖 Hakkında
 
-**DevBoard**, yazılım geliştiricilerin projelerini ve yetkinliklerini sergilediği, çalışan veya takım arkadaşı arayanların ise nitelikli adayları filtreleyerek keşfettiği dinamik bir ekosistemdir. Bilgisayar Kavramları (BK) bünyesindeki projeleri temel alan referans ve onaylama (endorsement) sistemi sayesinde, geliştiricilerin gerçek dünya deneyimleri doğrulanabilir ve şeffaf bir şekilde sunulur.
 <!-- Bu repository'nin ne yaptığını buraya yazın -->
 
 ## 🚀 Kurulum
@@ -35,15 +27,69 @@ Projelerini sergile, yeteneklerini göster ve keşfet!
 ### Gereksinimler
 
 - Gerekli araçları buraya listeleyin
-- [Git](https://git-scm.com/)
 
 ### Başlangıç
+
+
+```bash
+git clone https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard.git
+cd project-devboard
+
+# Kurulum adımlarını buraya ekleyin
+```
+
+## 💻 Kullanım
+
+```bash
+# Uygulamayı çalıştırma komutunu buraya ekleyin
+```
+
+## 📁 Proje Yapısı
+
+```
+project-devboard/
+├── src/          # Kaynak kodlar
+├── tests/        # Testler
+├── docs/         # Dokümantasyon
+└── README.md     # Bu dosya
+```
+
+## 🧪 Test
+
+```bash
+# Test komutlarını buraya ekleyin
+```
+
+## 🤝 Katkıda Bulunma
+
+Katkıda bulunmak için lütfen [`CONTRIBUTING.md`](.github/CONTRIBUTING.md) dosyasını inceleyin.
+
+## 📚 Dokümantasyon
+
+- [Proje Tanımı](docs/Project-Definition.md)
+- [Mimari Genel Bakış](docs/Architecture-Overview.md)
+- [Geliştirme Akışı](docs/Development-Workflow.md)
+
+## 📄 Lisans
+
+Bu proje MIT Lisansı ile lisanslanmıştır - detaylar için [LICENSE](LICENSE) dosyasına bakın.
+
+---
+
+**Proje Lideri:** [@ysfcc](https://github.com/ysfcc)
+
+</details>
+
+<details>
+<summary><strong>🇬🇧 English</strong></summary>
+
+<br>
+
 
 > **IMPORTANT:** This repository is part of **Projelerini sergile, yeteneklerini göster ve keşfet!** project. See [`docs/Project-Definition.md`](docs/Project-Definition.md) for details.
 
 ## 📖 About
 
-**DevBoard** is a dynamic ecosystem where software developers showcase their projects and competencies, and recruiters discover qualified candidates through advanced filtering. Leveraging a reference and endorsement system based on "Bilgisayar Kavramları" (BK) projects, it ensures that developers' real-world experiences are presented in a verifiable and transparent manner.
 <!-- Describe what this repository does -->
 
 ## 🚀 Installation
@@ -60,99 +106,52 @@ Projelerini sergile, yeteneklerini göster ve keşfet!
 ### Getting Started
 
 
-## 🔐 .env Yönetimi
-
-### Ortam Bazlı Yaklaşım
-
-DevBoard'da ortam değişkenleri ortama göre farklı yönetilir:
-
-| Ortam | Yönetim | Dosya | Açıklama |
-|-------|---------|-------|----------|
-| **Development** | Lokal `.env.age` → Decrypt | `.env` | Geliştirici tarafından decrypt edilir |
-| **Staging** | Google Secrets Manager | Yok | GCP Console'dan yönetilir |
-| **Production** | Google Secrets Manager | Yok | GCP Console'dan yönetilir |
-
-⚠️ **Önemli**: Staging ve production ortamları için lokal `.env` dosyası oluşturmanıza gerek yoktur. Bu ortamların değişkenlerini değiştirmek için DevOps ekibine başvurun.
-
-### Lokal Geliştirme Kurulumu
-
-#### Gereksinimler
-
-- **age** şifreleme aracı
-- GitHub hesabında SSH Authentication key
-
-#### 1. age Aracını Kurun
-
 ```bash
-# macOS
-brew install age
+git clone https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard.git
+cd project-devboard
 
-# Linux (Debian/Ubuntu)
-apt install age
-
-# Windows (PowerShell)
-winget install FiloSottile.age
-
-# Doğrula
-age --version
+# Add installation steps here
 ```
 
-#### 2. GitHub SSH Key'i Ekleyin
-
-GitHub hesabınızda SSH Authentication key yoksa ekleyin:
+## 💻 Usage
 
 ```bash
-# Mevcut key'leri kontrol et
-ls ~/.ssh/
-
-# Key yoksa oluştur
-ssh-keygen -t ed25519 -C "your-email@example.com"
-
-# Public key'i göster
-cat ~/.ssh/id_ed25519.pub
+# Add command to run the application
 ```
 
-Çıktıyı kopyalayıp GitHub Settings → SSH and GPG keys → New SSH key olarak ekleyin.
+## 📁 Project Structure
 
-#### 3. .env.age Dosyasını Decrypt Edin
+```
+project-devboard/
+├── src/          # Source code
+├── tests/        # Tests
+├── docs/         # Documentation
+└── README.md     # This file
+```
 
-Proje kök dizininde çalıştırın:
+## 🧪 Testing
 
 ```bash
-./encrypt-env-file.sh decrypt
+# Add test commands here
 ```
 
-Bu komut `.env.age` dosyasını decrypt ederek `.env` dosyası oluşturur.
+## 🤝 Contributing
 
-Doğrulama:
-```bash
-cat .env | grep ENVIRONMENT  # Development ortamını göstermelidir
-```
+Please see [`CONTRIBUTING.md`](.github/CONTRIBUTING.md) for contribution guidelines.
 
-### encrypt-env-file.sh Script Referansı
+## 📚 Documentation
 
-Bu script, `.env` dosyasını GitHub SSH key'leri kullanarak şifreler/çözer.
+- [Project Definition](docs/Project-Definition.md)
+- [Architecture Overview](docs/Architecture-Overview.md)
+- [Development Workflow](docs/Development-Workflow.md)
 
-**Şifreleme (Encrypt)** — `.env` → `.env.age`:
-```bash
-./encrypt-env-file.sh
-```
+## 📄 License
 
-**Şifre Çözme (Decrypt)** — `.env.age` → `.env`:
-```bash
-./encrypt-env-file.sh decrypt
-```
+This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
 
-### Güvenlik Notları
+---
 
-- ✅ `.env` dosyası Git'e commit edilmez
-- ✅ Yalnızca `.env.age` Git'e eklenebilir
-- ✅ Şifreleme GitHub username'lere bağlıdır
-- ✅ Private key'iniz gizli kalmalıdır
+**Project Lead:** [@ysfcc](https://github.com/ysfcc)
 
-### Alıcı (Recipient) Yönetimi
-
-Şifreleme yetkisi olan kullanıcıları değiştirmek için `encrypt-env-file.sh` scriptinin başındaki `RECIPIENTS` listesini düzenleyin. Listeye eklenen her GitHub username:
-- GitHub'daki SSH public key'i ile şifrelemeye dahil edilir
-- Kendi private key'i ile dosyayı decrypt edebilir
+</details>
 

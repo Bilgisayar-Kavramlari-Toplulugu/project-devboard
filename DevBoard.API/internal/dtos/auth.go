@@ -1,11 +1,12 @@
 package dtos
 
 type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
+	Identifier string `json:"identifier" validate:"required"`
+	Password   string `json:"password" validate:"required,min=6"`
 }
 
 type SignupRequest struct {
+	Username    string  `json:"username" validate:"required,min=3,max=50,alphanum"`
 	Email       string  `json:"email" validate:"required,email"`
 	Password    string  `json:"password" validate:"required,min=8"`
 	Firstname   string  `json:"firstname" validate:"required,min=2,max=100"`

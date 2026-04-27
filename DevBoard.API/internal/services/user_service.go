@@ -7,16 +7,16 @@ import (
 	"project-devboard/internal/dtos"
 	"project-devboard/internal/repository"
 	"project-devboard/pkg/apperrors"
+	"project-devboard/pkg/pagination"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-
 )
 
 type UserService interface {
 	CreateUser(ctx context.Context, req dtos.UserCreateRequest, actorID uuid.UUID) (*entities.User, error)
 	GetUser(id uuid.UUID) (*entities.User, error)
-	ListUsers(limit, offset int) ([]entities.User, error)
+	ListUsers(page, pageSize int) (*pagination.PaginatedResult[dtos.UserResponse], error)
 	UpdateUser(ctx context.Context, id uuid.UUID, req dtos.UserUpdateRequest, actorID uuid.UUID) (*entities.User, error)
 	DeleteUser(id uuid.UUID) error
 }
@@ -30,7 +30,7 @@ func NewUserService(repo repository.UserRepository) UserService {
 }
 
 func (s *userService) CreateUser(ctx context.Context, req dtos.UserCreateRequest, actorID uuid.UUID) (*entities.User, error) {
-	existing, err := s.repo.GetByEmail(req.Email)
+	existing, err := s.repo.GetByIdentifier(req.Email)
 	if err != nil {
 		return nil, apperrors.Wrap(apperrors.InternalError, apperrors.ErrInternalServer, err)
 	}
@@ -78,14 +78,30 @@ func (s *userService) GetUser(id uuid.UUID) (*entities.User, error) {
 	return user, nil
 }
 
-func (s *userService) ListUsers(limit, offset int) ([]entities.User, error) {
-	if limit <= 0 {
-		limit = 10
+func (s *userService) ListUsers(page, pageSize int) (*pagination.PaginatedResult[dtos.UserResponse], error) {
+	if page <= 0 {
+		page = 1
 	}
-	if limit > 100 {
-		limit = 100
+	if pageSize <= 0 {
+		pageSize = 10
 	}
-	return s.repo.List(limit, offset)
+	if pageSize > 100 {
+		pageSize = 100
+	}
+	userlist, err := s.repo.PaginatedList(page, pageSize)
+	userresponslist := &pagination.PaginatedResult[dtos.UserResponse]{
+		Data:       dtos.NewUserResponses(userlist.Data),
+		Total:      userlist.Total,
+		Page:       userlist.Page,
+		PageSize:   userlist.PageSize,
+		TotalPages: userlist.TotalPages,
+	}
+
+	if err != nil {
+		return nil, apperrors.Wrap(apperrors.InternalError, apperrors.ErrInternalServer, err)
+	}
+
+	return userresponslist,nil
 }
 
 func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, req dtos.UserUpdateRequest, actorID uuid.UUID) (*entities.User, error) {
@@ -98,7 +114,7 @@ func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, req dtos.Use
 	}
 
 	if req.Email != nil {
-		emailOwner, err := s.repo.GetByEmail(*req.Email)
+		emailOwner, err := s.repo.GetByIdentifier(*req.Email)
 		if err != nil {
 			return nil, apperrors.Wrap(apperrors.InternalError, apperrors.ErrInternalServer, err)
 		}
