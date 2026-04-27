@@ -1,24 +1,26 @@
-name: Go Backend CI
+name: DevBoard CI
 
 on:
   push:
     branches: ["develop"]
     paths:
       - "DevBoard.API/**"
+      - ".github/workflows/**"
+
   pull_request:
     branches: ["develop"]
     paths:
       - "DevBoard.API/**"
+      - ".github/workflows/**"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
 env:
   COVERAGE_THRESHOLD: 70
 
 jobs:
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -38,13 +40,17 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod
-          key: ${{ runner.os }}-gomod-${{ hashFiles('DevBoard.API/go.sum') }}
+          key: ${{ runner.os }}-gomod-${{ hashFiles('DevBoard.API/go.sum', 'DevBoard.API/go.mod') }}
+          restore-keys: |
+            ${{ runner.os }}-gomod-
 
       - name: Cache Go Build
         uses: actions/cache@v4
         with:
           path: ~/.cache/go-build
-          key: ${{ runner.os }}-gobuild-${{ hashFiles('DevBoard.API/go.sum') }}
+          key: ${{ runner.os }}-gobuild-${{ hashFiles('DevBoard.API/go.sum', 'DevBoard.API/go.mod') }}
+          restore-keys: |
+            ${{ runner.os }}-gobuild-
 
       - name: Check Formatting
         run: |
@@ -54,13 +60,11 @@ jobs:
             exit 1
           fi
 
-      - name: Install golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s latest
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-
-      - name: Run Linter
-        run: golangci-lint run ./...
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.57.2
+          working-directory: DevBoard.API
 
   test:
     name: Test
@@ -84,10 +88,11 @@ jobs:
       - name: Enforce Coverage
         run: |
           COVERAGE=$(go tool cover -func=coverage.txt | grep total | awk '{print $3}' | sed 's/%//')
+
           echo "Coverage: $COVERAGE%"
 
-          if (( $(echo "$COVERAGE < $COVERAGE_THRESHOLD" | bc -l) )); then
-            echo "Coverage düşük!"
+          if [ "$(echo "$COVERAGE < $COVERAGE_THRESHOLD" | bc -l)" -eq 1 ]; then
+            echo "Coverage düşük! ($COVERAGE% < $COVERAGE_THRESHOLD%)"
             exit 1
           fi
 
@@ -111,12 +116,12 @@ jobs:
         run: |
           mkdir -p build
 
-          PKGS=$(go list -f '{{if eq .Name "main"}}{{.ImportPath}}{{end}}' ./... | grep -v '^$')
+          for dir in $(find cmd -maxdepth 1 -mindepth 1 -type d); do
+            name=$(basename $dir)
+            echo "Building $dir -> $name"
 
-          for pkg in $PKGS; do
-            name=$(basename $pkg)
-            echo "Building $pkg -> $name"
-            CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o build/$name $pkg
+            CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+            go build -ldflags="-s -w" -o build/$name ./$dir
           done
 
       - name: Upload artifacts
