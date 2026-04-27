@@ -135,8 +135,18 @@ func (h *SkillHandler) Update(c *gin.Context) {
 		c.Error(apperrors.Validation(toAppFieldErrors(fieldErrors)))
 		return
 	}
+	var query dtos.SkillIdQuery
+	if err := c.ShouldBindUri(&query); err != nil {
+		c.Error(apperrors.New(apperrors.InvalidRequest, apperrors.ErrInvalidRequest))
+		return
+	}
+	if err := h.validator.Validate(query); err != nil {
+		fieldErrors := h.validator.FormatErrors(err)
+		c.Error(apperrors.Validation(toAppFieldErrors(fieldErrors)))
+		return
+	}
 	err := h.Service.UpdateSkill(services.UpdateSkillInput{
-		Id:          req.Id,
+		Id:          query.Id,
 		Name:        req.Name,
 		SkillTypeId: req.SkillTypeId,
 	})

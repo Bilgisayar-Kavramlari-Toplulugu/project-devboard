@@ -12,7 +12,6 @@ type SkillIdQuery struct {
 }
 
 type SkillUpdateRequest struct {
-	Id          int    `json:"id" validate:"required"`
 	Name        string `json:"name" validate:"required"`
 	SkillTypeId int    `json:"skill_type_id" validate:"required"`
 }
