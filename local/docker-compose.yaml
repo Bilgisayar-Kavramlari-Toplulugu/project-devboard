@@ -1,0 +1,50 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: devboard-postgres
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../DevBoard.API
+      dockerfile: Dockerfile
+    container_name: devboard-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ../DevBoard.WebUI
+      dockerfile: Dockerfile
+    container_name: devboard-frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      HOST: 0.0.0.0
+      PORT: 5173
+    ports:
+      - "5173:5173"
+
+volumes:
+  postgres_data:
