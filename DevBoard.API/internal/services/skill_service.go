@@ -79,7 +79,7 @@ func (s *skillService) GetSkillById(id int) (*entities.Skill, error) {
 }
 
 func (s *skillService) GetAllSkills() ([]entities.Skill, error) {
-	return s.repository.List(1000, 0)
+	return s.repository.ListAll()
 }
 
 func (s *skillService) UpdateSkill(input UpdateSkillInput) error {

@@ -39,7 +39,6 @@ import (
 // @BasePath  /api/v1
 func main() {
 	cfg := config.Load()
-	
 
 	createDatabaseIfNotExists(cfg.DatabaseURL)
 
@@ -59,12 +58,9 @@ func main() {
 	skillTypeRepo := repository.NewSkillTypeRepository(db)
 	developerDashboardRepo := repository.NewDeveloperDashboardRepository(db)
 	jobTypeRepo := repository.NewJobTypeRepository(db)
-<<<<<<< HEAD
 	skillRepo := repository.NewSkillRepository(db)
-=======
 	countryRepo := repository.NewCountryRepository(db)
 	cityRepo := repository.NewCityRepository(db)
->>>>>>> origin/develop
 
 	// Services
 	jwtService := services.NewJWTService(cfg, db)
@@ -73,12 +69,9 @@ func main() {
 	skillTypeService := services.NewSkillTypeService(skillTypeRepo)
 	developerDashboardService := services.NewDeveloperDashboardService(developerDashboardRepo)
 	jobTypeService := services.NewJobTypeService(jobTypeRepo)
-<<<<<<< HEAD
 	skillService := services.NewSkillService(skillRepo, skillTypeRepo)
-=======
 	countryService := services.NewCountryService(countryRepo)
 	cityService := services.NewCityService(cityRepo)
->>>>>>> origin/develop
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService, v, cfg)
@@ -86,12 +79,9 @@ func main() {
 	skillTypeHandler := handler.NewSkillTypeHandler(skillTypeService, v)
 	developerDashboardHandler := handler.NewDeveloperDashboardHandler(developerDashboardService)
 	jobTypeHandler := handler.NewJobTypeHandler(jobTypeService, v)
-<<<<<<< HEAD
 	skillHandler := handler.NewSkillHandler(skillService, v)
-=======
 	countryHandler := handler.NewCountryHandler(countryService, v)
 	cityHandler := handler.NewCityHandler(cityService, v)
->>>>>>> origin/develop
 
 	// Router
 	r := gin.New()
@@ -117,20 +107,17 @@ func main() {
 	}))
 
 	routes.SetupRoutes(r, &routes.RouteConfig{
-		DB:               db,
-		UserHandler:      userHandler,
-		AuthHandler:      authHandler,
-		JWTService:       jwtService,
-		SkillTypeHandler: skillTypeHandler,
-		JobTypeHandler:   jobTypeHandler,
-<<<<<<< HEAD
-		SkillHandler:     skillHandler,
-=======
-		CountryHandler:   countryHandler,
-		CityHandler:      cityHandler,
+		DB:                        db,
+		UserHandler:               userHandler,
+		AuthHandler:               authHandler,
+		JWTService:                jwtService,
+		SkillTypeHandler:          skillTypeHandler,
+		JobTypeHandler:            jobTypeHandler,
+		SkillHandler:              skillHandler,
+		CountryHandler:            countryHandler,
+		CityHandler:               cityHandler,
 		DeveloperDashboardHandler: developerDashboardHandler,
->>>>>>> origin/develop
-		Config:           cfg,
+		Config:                    cfg,
 	})
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
