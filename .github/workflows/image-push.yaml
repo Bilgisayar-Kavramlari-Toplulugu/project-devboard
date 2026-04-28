@@ -1,0 +1,223 @@
+name: Image Build & Push
+
+on:
+  push:
+    branches:
+      - release       # fires on PR merge (via squash/merge commit)
+      - push-images   # test branch for manual validation
+    paths:
+      - "DevBoard.WebUI/**"
+      - "DevBoard.API/**"
+      - ".github/workflows/image-push.yaml"
+
+# Least-privilege: only grant what each job needs
+permissions:
+  contents: read
+  packages: write          # push & delete GHCR packages
+  security-events: write   # upload Trivy SARIF to Security tab
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    if: ${{ contains(github.event.head_commit.modified, 'DevBoard.WebUI/') || contains(toJSON(github.event.commits.*.modified), 'DevBoard.WebUI') }}
+
+    env:
+      IMAGE_NAME: bilgisayar-kavramlari-toplulugu/devboard-webui
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # BuildKit enables layer caching and advanced build features
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Generates OCI-compliant tags and labels
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            # Short SHA tag (e.g. sha-a1b2c3d) — always applied
+            type=sha,format=short
+            # 'latest' tag only on the release branch
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/release' }}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ./DevBoard.WebUI
+          file: ./DevBoard.WebUI/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Attach SLSA provenance and SBOM attestations to the image
+          provenance: true
+          sbom: true
+          # Reuse GHA cache to speed up subsequent builds
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Scan the pushed image (by digest) for known CVEs
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          exit-code: "0"          # never fail — findings are surfaced in the job summary
+          ignore-unfixed: true    # skip vulns with no available fix
+
+      # Parse SARIF and write a human-readable table to the job summary page
+      - name: Write vulnerability summary
+        if: always()
+        run: |
+          if [ ! -f trivy-results.sarif ]; then
+            echo "### ✅ Vulnerability Scan — output unavailable" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          count=$(jq '[.runs[].results[]] | length' trivy-results.sarif 2>/dev/null || echo 0)
+          if [ "$count" -gt 0 ]; then
+            {
+              echo "### ⚠️ Vulnerability Scan — ${count} finding(s) detected"
+              echo ""
+              echo "Severity filter: \`CRITICAL, HIGH\` · unfixable CVEs excluded"
+              echo ""
+              jq -r '[.runs[0].results[].ruleId] | unique[] | "- `\(.)`"' trivy-results.sarif
+              echo ""
+              echo "> Full details and remediation in the [Security tab](${{ github.server_url }}/${{ github.repository }}/security/code-scanning)."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### ✅ Vulnerability Scan — No fixable CRITICAL/HIGH findings" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # Upload even on failure so results are always visible in the Security tab
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+
+      # Retain only the 10 most recent versions — old images are auto-deleted
+      - name: Delete old package versions (keep last 10)
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: devboard-webui
+          package-type: container
+          min-versions-to-keep: 10
+          delete-only-untagged-versions: false
+
+  build-push-api:
+    runs-on: ubuntu-latest
+    if: ${{ contains(github.event.head_commit.modified, 'DevBoard.API/') || contains(toJSON(github.event.commits.*.modified), 'DevBoard.API') }}
+
+    env:
+      IMAGE_NAME: bilgisayar-kavramlari-toplulugu/devboard-api
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # BuildKit enables layer caching and advanced build features
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Generates OCI-compliant tags and labels
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            # Short SHA tag (e.g. sha-a1b2c3d) — always applied
+            type=sha,format=short
+            # 'latest' tag only on the release branch
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/release' }}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ./DevBoard.API
+          file: ./DevBoard.API/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Attach SLSA provenance and SBOM attestations to the image
+          provenance: true
+          sbom: true
+          # Reuse GHA cache to speed up subsequent builds
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Scan the pushed image (by digest) for known CVEs
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          exit-code: "0"          # never fail — findings are surfaced in the job summary
+          ignore-unfixed: true    # skip vulns with no available fix
+
+      # Parse SARIF and write a human-readable table to the job summary page
+      - name: Write vulnerability summary
+        if: always()
+        run: |
+          if [ ! -f trivy-results.sarif ]; then
+            echo "### ✅ Vulnerability Scan — output unavailable" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          count=$(jq '[.runs[].results[]] | length' trivy-results.sarif 2>/dev/null || echo 0)
+          if [ "$count" -gt 0 ]; then
+            {
+              echo "### ⚠️ Vulnerability Scan — ${count} finding(s) detected"
+              echo ""
+              echo "Severity filter: \`CRITICAL, HIGH\` · unfixable CVEs excluded"
+              echo ""
+              jq -r '[.runs[0].results[].ruleId] | unique[] | "- `\(.)`"' trivy-results.sarif
+              echo ""
+              echo "> Full details and remediation in the [Security tab](${{ github.server_url }}/${{ github.repository }}/security/code-scanning)."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### ✅ Vulnerability Scan — No fixable CRITICAL/HIGH findings" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # Upload even on failure so results are always visible in the Security tab
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+
+      # Retain only the 10 most recent versions — old images are auto-deleted
+      - name: Delete old package versions (keep last 10)
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: devboard-api
+          package-type: container
+          min-versions-to-keep: 10
+          delete-only-untagged-versions: false
