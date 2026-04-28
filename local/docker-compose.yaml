@@ -1,52 +1,78 @@
+version: "3.9"
+
 services:
+
   db:
     image: postgres:17-alpine
     container_name: devboard_db
     restart: unless-stopped
+
+    env_file:
+      - .env
+
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: devboard
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
     ports:
       - "5432:5432"
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
+
     networks:
       - app-network
+
 
   backend:
     image: project-devboard-backend
     container_name: devboard_backend
     restart: unless-stopped
+
     depends_on:
       db:
         condition: service_healthy
+
+    env_file:
+      - .env
+
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/devboard?sslmode=disable
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable
       GIN_MODE: release
+
     ports:
       - "8080:8080"
+
     networks:
       - app-network
+
 
   frontend:
     image: project-devboard-frontend
     container_name: devboard_frontend
     restart: unless-stopped
+
     depends_on:
       - backend
+
     ports:
-      - "80:80"
+      - "5173:5173"
+
     networks:
       - app-network
+
 
 volumes:
   postgres_data:
 
+
 networks:
   app-network:
+    driver: bridge
