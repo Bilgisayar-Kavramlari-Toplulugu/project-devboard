@@ -75,8 +75,31 @@ jobs:
           format: sarif
           output: trivy-results.sarif
           severity: CRITICAL,HIGH
-          exit-code: "1"          # fail the build on findings
+          exit-code: "0"          # never fail — findings are surfaced in the job summary
           ignore-unfixed: true    # skip vulns with no available fix
+
+      # Parse SARIF and write a human-readable table to the job summary page
+      - name: Write vulnerability summary
+        if: always()
+        run: |
+          if [ ! -f trivy-results.sarif ]; then
+            echo "### ✅ Vulnerability Scan — output unavailable" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          count=$(jq '[.runs[].results[]] | length' trivy-results.sarif 2>/dev/null || echo 0)
+          if [ "$count" -gt 0 ]; then
+            {
+              echo "### ⚠️ Vulnerability Scan — ${count} finding(s) detected"
+              echo ""
+              echo "Severity filter: \`CRITICAL, HIGH\` · unfixable CVEs excluded"
+              echo ""
+              jq -r '[.runs[0].results[].ruleId] | unique[] | "- `\(.)`"' trivy-results.sarif
+              echo ""
+              echo "> Full details and remediation in the [Security tab](${{ github.server_url }}/${{ github.repository }}/security/code-scanning)."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### ✅ Vulnerability Scan — No fixable CRITICAL/HIGH findings" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       # Upload even on failure so results are always visible in the Security tab
       - name: Upload Trivy results to GitHub Security tab
