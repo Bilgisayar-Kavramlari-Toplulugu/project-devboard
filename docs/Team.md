@@ -14,9 +14,9 @@ Oradaki liste **her zaman günceldir**.
 - **Proje Adı:** Projelerini sergile, yeteneklerini göster ve keşfet!
 - **Takım Adı:** DevBoard
 - **Proje Lideri:** @ysfcc
-- **Toplam Üye Sayısı:** 3
-- **Maintainer Sayısı:** 1
-- **Member Sayısı:** 2
+- **Toplam Üye Sayısı:** 8
+- **Maintainer Sayısı:** 2
+- **Member Sayısı:** 6
 
 ---
 
@@ -57,9 +57,9 @@ To see the current members and roles of this project, please visit the official 
 - **Project Name:** Projelerini sergile, yeteneklerini göster ve keşfet!
 - **Team Name:** DevBoard
 - **Project Lead:** @ysfcc
-- **Total Members:** 3
-- **Maintainers:** 1
-- **Members:** 2
+- **Total Members:** 8
+- **Maintainers:** 2
+- **Members:** 6
 
 ---
 
