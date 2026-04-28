@@ -1,78 +1,50 @@
-version: "3.9"
-
 services:
 
-  db:
-    image: postgres:17-alpine
-    container_name: devboard_db
+  postgres:
+    image: postgres:16-alpine
+    container_name: devboard-postgres
     restart: unless-stopped
-
     env_file:
-      - .env
-
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-
+      - ../.env
     ports:
       - "5432:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 5
 
-    networks:
-      - app-network
-
-
-  backend:
-    image: project-devboard-backend
-    container_name: devboard_backend
+  api:
+    build:
+      context: ../DevBoard.API
+      dockerfile: Dockerfile
+    container_name: devboard-api
     restart: unless-stopped
-
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
-
     env_file:
-      - .env
-
+      - ../.env
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable
-      GIN_MODE: release
-
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
     ports:
       - "8080:8080"
 
-    networks:
-      - app-network
-
-
   frontend:
-    image: project-devboard-frontend
-    container_name: devboard_frontend
+    build:
+      context: ../DevBoard.WebUI
+      dockerfile: Dockerfile
+    container_name: devboard-frontend
     restart: unless-stopped
-
     depends_on:
-      - backend
-
+      - api
+    environment:
+      HOST: 0.0.0.0
+      PORT: 5173
     ports:
       - "5173:5173"
 
-    networks:
-      - app-network
-
-
 volumes:
   postgres_data:
-
-
-networks:
-  app-network:
-    driver: bridge
