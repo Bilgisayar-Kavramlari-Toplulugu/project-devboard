@@ -20,9 +20,9 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  build-push:
+  build-push-WebUI:
     runs-on: ubuntu-latest
-    if: ${{ contains(github.event.head_commit.modified, 'DevBoard.WebUI/') || contains(toJSON(github.event.commits.*.modified), 'DevBoard.WebUI') }}
+    # if: ${{ contains(github.event.head_commit.modified, 'DevBoard.WebUI/') || contains(toJSON(github.event.commits.*.modified), 'DevBoard.WebUI') }}
 
     env:
       IMAGE_NAME: bilgisayar-kavramlari-toplulugu/devboard-webui
@@ -123,7 +123,7 @@ jobs:
 
   build-push-api:
     runs-on: ubuntu-latest
-    if: ${{ contains(github.event.head_commit.modified, 'DevBoard.API/') || contains(toJSON(github.event.commits.*.modified), 'DevBoard.API') }}
+    # if: ${{ contains(github.event.head_commit.modified, 'DevBoard.API/') || contains(toJSON(github.event.commits.*.modified), 'DevBoard.API') }}
 
     env:
       IMAGE_NAME: bilgisayar-kavramlari-toplulugu/devboard-api
