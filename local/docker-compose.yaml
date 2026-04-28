@@ -1,50 +1,45 @@
-services:
+version: "3.9"
 
-  postgres:
-    image: postgres:16-alpine
-    container_name: devboard-postgres
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: devboard_db
     restart: unless-stopped
-    env_file:
-      - ../.env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: devboard
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
-  api:
-    build:
-      context: ../DevBoard.API
-      dockerfile: Dockerfile
-    container_name: devboard-api
+  backend:
+    image: project-devboard-backend
+    container_name: devboard_backend
     restart: unless-stopped
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
-    env_file:
-      - ../.env
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+      DATABASE_URL: postgres://postgres:postgres@db:5432/devboard?sslmode=disable
+      GIN_MODE: release
     ports:
       - "8080:8080"
 
   frontend:
-    build:
-      context: ../DevBoard.WebUI
-      dockerfile: Dockerfile
-    container_name: devboard-frontend
+    image: project-devboard-frontend
+    container_name: devboard_frontend
     restart: unless-stopped
     depends_on:
-      - api
-    environment:
-      HOST: 0.0.0.0
-      PORT: 5173
+      - backend
     ports:
-      - "5173:5173"
+      - "80:5173"
 
 volumes:
-  postgres_data:
+  postgres_data
