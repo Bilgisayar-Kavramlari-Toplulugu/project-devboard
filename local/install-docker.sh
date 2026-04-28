@@ -8,9 +8,10 @@ sudo apt install -y \
     ca-certificates \
     curl \
     gnupg \
-    lsb-release
+    lsb-release \
+    git
 
-sudo mkdir -p /etc/apt/keyrings
+sudo install -m 0755 -d /etc/apt/keyrings
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
 sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -23,9 +24,19 @@ echo \
 
 sudo apt update -y
 
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo apt install -y \
+    docker-ce \
+    docker-ce-cli \
+    containerd.io \
+    docker-compose-plugin
+
+sudo systemctl enable docker
+sudo systemctl start docker
 
 sudo usermod -aG docker $USER
 
 echo "Docker kurulumu tamamlandı"
 echo "Logout/login yap veya: newgrp docker"
+
+docker --version
+docker compose version
