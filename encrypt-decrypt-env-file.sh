@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 
 # ── Usage ─────────────────────────────────────────────────────────────────────
 #
@@ -29,6 +29,7 @@ RECIPIENTS=(
     DincerY
     eyupsosa34
     yusufsoyludev
+    cihangiryaman
     # add-username-here
     
 
@@ -37,15 +38,15 @@ RECIPIENTS=(
 
 # ── Check if age is installed ─────────────────────────────────────────────────
 if ! command -v age &> /dev/null; then
-    echo "✗ 'age' is not installed. Install it first:"
-    echo ""
-    echo "  macOS:   brew install age"
-    echo ""
-    echo "  Windows: winget install FiloSottile.age"
-    echo "           (or download from https://github.com/FiloSottile/age/releases)"
-    echo ""
-    exit 1
-fi
+        echo "✗ 'age' is not installed. Install it first:"
+        echo ""
+        echo "  macOS:   brew install age"
+        echo ""
+        echo "  Windows: winget install FiloSottile.age"
+        echo "           (or download from https://github.com/FiloSottile/age/releases)"
+        echo ""
+        exit 1
+    fi
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Decrypt mode ─────────────────────────────────────────────────────────────
