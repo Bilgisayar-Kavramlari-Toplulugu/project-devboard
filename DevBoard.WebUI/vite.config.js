@@ -19,7 +19,6 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: [
-      '34.171.99.177',
       'devboard-test.duckdns.org'
     ]
   }
