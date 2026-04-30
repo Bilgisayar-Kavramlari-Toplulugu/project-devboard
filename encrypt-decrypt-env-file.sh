@@ -29,6 +29,7 @@ RECIPIENTS=(
     DincerY
     eyupsosa34
     yusufsoyludev
+    cihangiryaman
     # add-username-here
     
 
