@@ -15,6 +15,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - devboard_network
+    security_opt:
+      - no-new-privileges:true
 
   api:
     build:
@@ -31,6 +35,10 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
     ports:
       - "8080:8080"
+    networks:
+      - devboard_network
+    security_opt:
+      - no-new-privileges:true
 
   frontend:
     build:
@@ -40,11 +48,21 @@ services:
     restart: unless-stopped
     depends_on:
       - api
+    env_file:
+      - ../.env
     environment:
       HOST: 0.0.0.0
       PORT: 5173
     ports:
       - "5173:5173"
+    networks:
+      - devboard_network
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  devboard_network:
+    driver: bridge
 
 volumes:
   postgres_data:
