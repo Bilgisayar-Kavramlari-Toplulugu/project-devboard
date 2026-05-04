@@ -9,7 +9,9 @@ Runs the full DevBoard stack (PostgreSQL, API, Frontend) locally using Docker Co
 
 ## 1. Decrypt the .env file
 
-The `.env` file is encrypted as `.env.age` using [age](https://github.com/FiloSottile/age) and lives at the repo root. Your SSH public key must be registered as a recipient in `encrypt-decrypt-env-file.sh`.
+The `.env` file is encrypted as `.env.age` using [age](https://github.com/FiloSottile/age) and lives at the repo root. 
+Your SSH public key must be added to the https://github.com/settings/keys
+Your SSH public key must be registered as a recipient in `encrypt-decrypt-env-file.sh`.
 
 Install `age` if you don't have it:
 
@@ -42,9 +44,9 @@ Services will start in order: `postgres` → `api` → `frontend`
 
 | Service  | URL                        |
 |----------|----------------------------|
-| Frontend | http://localhost:5173       |
-| API      | http://localhost:8080       |
-| Postgres | localhost:5432              |
+| Frontend | http://localhost:5173      |
+| API      | http://localhost:8080      |
+| Postgres | localhost:5432             |
 
 ## 3. Stop the stack
 
