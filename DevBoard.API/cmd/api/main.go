@@ -39,7 +39,6 @@ import (
 // @BasePath  /api/v1
 func main() {
 	cfg := config.Load()
-	
 
 	createDatabaseIfNotExists(cfg.DatabaseURL)
 
@@ -61,6 +60,7 @@ func main() {
 	jobTypeRepo := repository.NewJobTypeRepository(db)
 	countryRepo := repository.NewCountryRepository(db)
 	cityRepo := repository.NewCityRepository(db)
+	userSkillRepo := repository.NewUserSkillRepository(db)
 
 	// Services
 	jwtService := services.NewJWTService(cfg, db)
@@ -71,6 +71,7 @@ func main() {
 	jobTypeService := services.NewJobTypeService(jobTypeRepo)
 	countryService := services.NewCountryService(countryRepo)
 	cityService := services.NewCityService(cityRepo)
+	userSkillService := services.NewUserSkillService(userSkillRepo)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authService, v, cfg)
@@ -80,6 +81,7 @@ func main() {
 	jobTypeHandler := handler.NewJobTypeHandler(jobTypeService, v)
 	countryHandler := handler.NewCountryHandler(countryService, v)
 	cityHandler := handler.NewCityHandler(cityService, v)
+	userSkillHandler := handler.NewUserSkillHandler(userSkillService, v)
 
 	// Router
 	r := gin.New()
@@ -105,16 +107,17 @@ func main() {
 	}))
 
 	routes.SetupRoutes(r, &routes.RouteConfig{
-		DB:               db,
-		UserHandler:      userHandler,
-		AuthHandler:      authHandler,
-		JWTService:       jwtService,
-		SkillTypeHandler: skillTypeHandler,
-		JobTypeHandler:   jobTypeHandler,
-		CountryHandler:   countryHandler,
-		CityHandler:      cityHandler,
+		DB:                        db,
+		UserHandler:               userHandler,
+		AuthHandler:               authHandler,
+		JWTService:                jwtService,
+		SkillTypeHandler:          skillTypeHandler,
+		JobTypeHandler:            jobTypeHandler,
+		CountryHandler:            countryHandler,
+		CityHandler:               cityHandler,
 		DeveloperDashboardHandler: developerDashboardHandler,
-		Config:           cfg,
+		UserSkillHandler:          userSkillHandler,
+		Config:                    cfg,
 	})
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
