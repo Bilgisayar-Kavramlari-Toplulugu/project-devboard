@@ -27,17 +27,45 @@ jobs:
             CONTAINER="devboard"
             OLD="devboard_old"
 
-            docker login ghcr.io -u ${{ secrets.GHCR_USER }} -p ${{ secrets.GHCR_TOKEN }}
+            echo "Login GHCR"
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USER }} --password-stdin
 
+            echo "Pull image"
             docker pull $IMAGE
 
+            echo "Stop old container"
             docker stop $CONTAINER || true
             docker rename $CONTAINER $OLD || true
 
+            echo "Run new container"
             docker run -d \
               --name $CONTAINER \
               --restart unless-stopped \
               -p 80:80 \
               $IMAGE
 
-            docker rm $OLD || true
+            echo "Health check"
+            SUCCESS=false
+            for i in {1..10}; do
+              if curl -fs http://localhost > /dev/null; then
+                SUCCESS=true
+                break
+              fi
+              sleep 3
+            done
+
+            if [ "$SUCCESS" = true ]; then
+              echo "Deploy OK"
+              docker rm $OLD || true
+              docker image prune -f
+            else
+              echo "Deploy FAILED → rollback"
+              docker stop $CONTAINER || true
+              docker rm $CONTAINER || true
+
+              if [ "$(docker ps -aq -f name=^/${OLD}$)" ]; then
+                docker start $OLD
+                docker rename $OLD $CONTAINER
+              fi
+              exit 1
+            fi
