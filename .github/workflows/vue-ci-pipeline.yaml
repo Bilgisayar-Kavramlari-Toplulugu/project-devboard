@@ -1,111 +1,59 @@
-name: Vue CI Pipeline
+name: Vue CD Pipeline
 
 on:
-  pull_request:
-    branches: ["develop"]
-    paths:
-      - "DevBoard.WebUI/**"
+  push:
+    branches:
+      - develop
+      - eyupsosa34-patch-1
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: devboard-webui
 
 jobs:
-  lint:
+
+  build-and-push:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./DevBoard.WebUI
+
+    outputs:
+      image: ${{ steps.image.outputs.image }}
 
     steps:
-      - name: Checkout Repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20 (with cache)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
-
-      - name: Run Lint
-        run: npm run lint
-
-
-  test:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./DevBoard.WebUI
-
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20 (with cache)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
-
-      - name: Run Tests
-        run: npm run test:unit
-
-
-  build:
-    runs-on: ubuntu-latest
-    needs: [lint, test]
-    defaults:
-      run:
-        working-directory: ./DevBoard.WebUI
-
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20 (with cache)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
-
-      - name: Build Project
-        run: npm run build
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Set lower case repo owner
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate Docker tags
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository_owner }}/devboard-webui
-          tags: |
-            type=sha,prefix=sha-
-            type=ref,event=branch
+      - name: Generate image tag
+        id: image
+        run: |
+          SHORT_SHA=${GITHUB_SHA::7}
+          TAG=${GITHUB_REF_NAME}-${SHORT_SHA}
+          IMAGE=${{ env.REGISTRY }}/${OWNER_LC}/${{ env.IMAGE_NAME }}:$TAG
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./DevBoard.WebUI
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ steps.image.outputs.image }} ./DevBoard.WebUI
 
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: vue-dist
-          path: DevBoard.WebUI/dist
+      - name: Push Docker Image
+        run: |
+          docker push ${{ steps.image.outputs.image }}
+
+      - name: Tag latest per branch
+        run: |
+          LATEST=${{ env.REGISTRY }}/${OWNER_LC}/${{ env.IMAGE_NAME }}:${GITHUB_REF_NAME}-latest
+          docker tag ${{ steps.image.outputs.image }} $LATEST
+          docker push $LATEST
