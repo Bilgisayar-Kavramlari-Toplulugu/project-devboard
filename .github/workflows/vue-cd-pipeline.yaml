@@ -27,7 +27,8 @@ jobs:
           script: |
             set -e
 
-            # Sadece develop branch kontrolü
+            echo "Deploy başlıyor..."
+
             if [ "${{ github.event_name }}" = "workflow_run" ] && [ "${{ github.event.workflow_run.head_branch }}" != "develop" ]; then
               echo "Not develop branch → exit"
               exit 0
@@ -37,24 +38,22 @@ jobs:
             CONTAINER="devboard"
             OLD="devboard_old"
 
-            echo "Pull image"
             docker pull $IMAGE
 
-            echo "Eski container kontrol"
             if [ "$(docker ps -aq -f name=^/${CONTAINER}$)" ]; then
               docker stop $CONTAINER || true
               docker rename $CONTAINER $OLD || true
             fi
 
-            echo "Yeni container başlatılıyor"
             docker run -d \
               --name $CONTAINER \
               --restart unless-stopped \
               -p 80:80 \
               $IMAGE
 
-            echo "Health check"
+            echo "Health check..."
             SUCCESS=false
+
             for i in {1..10}; do
               if curl -fs http://localhost > /dev/null; then
                 SUCCESS=true
