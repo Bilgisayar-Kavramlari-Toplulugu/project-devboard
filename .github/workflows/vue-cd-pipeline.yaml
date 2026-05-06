@@ -28,6 +28,7 @@ jobs:
       - name: Run Lint
         run: npm run lint
 
+
   test:
     runs-on: ubuntu-latest
     defaults:
@@ -48,11 +49,13 @@ jobs:
       - name: Run Tests
         run: npm run test:unit
 
+
   build:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./DevBoard.WebUI
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -73,3 +76,14 @@ jobs:
         with:
           name: vue-dist
           path: DevBoard.WebUI/dist
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker Image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/devboard-webui:${{ github.sha }} DevBoard.WebUI
+
+      - name: Push Docker Image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/devboard-webui:${{ github.sha }}
