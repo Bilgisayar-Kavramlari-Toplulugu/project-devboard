@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - eyupsosa34-patch-1
       
   workflow_run:
     workflows: ["Vue CI Pipeline"]
