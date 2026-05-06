@@ -1,0 +1,43 @@
+name: Vue CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["Vue CI Pipeline"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSH_KEY }}
+
+          script: |
+            set -e
+
+            IMAGE="ghcr.io/${{ github.repository_owner }}/devboard-webui:develop"
+            CONTAINER="devboard"
+            OLD="devboard_old"
+
+            docker login ghcr.io -u ${{ secrets.GHCR_USER }} -p ${{ secrets.GHCR_TOKEN }}
+
+            docker pull $IMAGE
+
+            docker stop $CONTAINER || true
+            docker rename $CONTAINER $OLD || true
+
+            docker run -d \
+              --name $CONTAINER \
+              --restart unless-stopped \
+              -p 80:80 \
+              $IMAGE
+
+            docker rm $OLD || true
