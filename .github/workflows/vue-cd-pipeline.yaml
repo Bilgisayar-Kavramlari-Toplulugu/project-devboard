@@ -77,7 +77,7 @@ jobs:
               if [ "$(docker ps -aq -f name=^/${OLD}$)" ]; then
                 docker start $OLD
                 docker rename $OLD $CONTAINER
-                echo "↩ rollback başarılı"
+                echo "rollback başarılı"
               else
                 echo "eski container bulunamadı"
               fi
