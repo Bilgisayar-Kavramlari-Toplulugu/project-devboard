@@ -1,64 +1,34 @@
-name: Vue CD Pipeline
+name: Vue CI Pipeline
 
 on:
-  workflow_run:
-    workflows: ["Vue CI Pipeline"]
-    types:
-      - completed
+  pull_request:
+    branches: ["develop"]
 
 jobs:
-  deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+  test-build:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: ./DevBoard.WebUI
+
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT }}
-          key: ${{ secrets.SSH_KEY }}
+          node-version: 20
 
-          script: |
-            set -e
+      - name: Install dependencies
+        run: npm ci
 
-            IMAGE="ghcr.io/bilgisayar-kavramlari-toplulugu/devboard-webui:sha-${{ github.event.workflow_run.head_sha }}"
-            CONTAINER="devboard"
-            OLD="devboard_old"
+      - name: Run Lint
+        run: npm run lint
 
-            echo "Pull image: $IMAGE"
-            docker pull $IMAGE
+      - name: Run Tests
+        run: npm run test:unit
 
-            docker stop $CONTAINER || true
-            docker rename $CONTAINER $OLD || true
-
-            docker run -d \
-              --name $CONTAINER \
-              --restart unless-stopped \
-              -p 80:80 \
-              $IMAGE
-
-            echo "Health check"
-            SUCCESS=false
-            for i in {1..10}; do
-              if curl -fs http://localhost > /dev/null; then
-                SUCCESS=true
-                break
-              fi
-              sleep 3
-            done
-
-            if [ "$SUCCESS" = true ]; then
-              docker rm $OLD || true
-              docker image prune -f
-            else
-              docker stop $CONTAINER || true
-              docker rm $CONTAINER || true
-
-              if [ "$(docker ps -aq -f name=^/${OLD}$)" ]; then
-                docker start $OLD
-                docker rename $OLD $CONTAINER
-              fi
-              exit 1
-            fi
+      - name: Build Project
+        run: npm run build
