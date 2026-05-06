@@ -6,7 +6,6 @@ on:
     paths:
       - "DevBoard.WebUI/**"
 
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -53,6 +52,7 @@ jobs:
     defaults:
       run:
         working-directory: ./DevBoard.WebUI
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -67,6 +67,17 @@ jobs:
 
       - name: Build Project
         run: npm run build
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker Image
+        run: |
+          docker build -t ghcr.io/bilgisayar-kavramlari-toplulugu/devboard-webui:develop .
+
+      - name: Push Docker Image
+        run: |
+          docker push ghcr.io/bilgisayar-kavramlari-toplulugu/devboard-webui:develop
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
