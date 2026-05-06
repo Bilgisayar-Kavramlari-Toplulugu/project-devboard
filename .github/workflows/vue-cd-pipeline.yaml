@@ -6,11 +6,6 @@ on:
       - develop
       - eyupsosa34-patch-1
 
-  workflow_run:
-    workflows: ["Vue CI Pipeline"]
-    types:
-      - completed
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,18 +16,11 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSH_KEY }}
 
           script: |
             set -e
-
-            echo "Deploy başlıyor..."
-
-            if [ "${{ github.event_name }}" = "workflow_run" ] && [ "${{ github.event.workflow_run.head_branch }}" != "develop" ]; then
-              echo "Not develop branch → exit"
-              exit 0
-            fi
 
             IMAGE="ghcr.io/${{ github.repository_owner }}/devboard-webui:develop"
             CONTAINER="devboard"
@@ -51,34 +39,25 @@ jobs:
               -p 80:80 \
               $IMAGE
 
-            echo "Health check..."
             SUCCESS=false
-
             for i in {1..10}; do
               if curl -fs http://localhost > /dev/null; then
                 SUCCESS=true
                 break
               fi
-              echo "Bekleniyor... ($i/10)"
               sleep 3
             done
 
             if [ "$SUCCESS" = true ]; then
-              echo "Deploy başarılı"
               docker rm $OLD || true
               docker image prune -f
             else
-              echo "Deploy başarısız → rollback"
               docker stop $CONTAINER || true
               docker rm $CONTAINER || true
 
               if [ "$(docker ps -aq -f name=^/${OLD}$)" ]; then
                 docker start $OLD
                 docker rename $OLD $CONTAINER
-                echo "Rollback başarılı"
-              else
-                echo "Eski container bulunamadı"
               fi
-
               exit 1
             fi
