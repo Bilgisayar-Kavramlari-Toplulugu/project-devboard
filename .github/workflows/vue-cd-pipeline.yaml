@@ -23,21 +23,16 @@ jobs:
           script: |
             set -e
 
-            IMAGE="ghcr.io/${{ github.repository_owner }}/devboard-webui:develop"
+            IMAGE="ghcr.io/bilgisayar-kavramlari-toplulugu/devboard-webui:sha-${{ github.event.workflow_run.head_sha }}"
             CONTAINER="devboard"
             OLD="devboard_old"
 
-            echo "Login GHCR"
-            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USER }} --password-stdin
-
-            echo "Pull image"
+            echo "Pull image: $IMAGE"
             docker pull $IMAGE
 
-            echo "Stop old container"
             docker stop $CONTAINER || true
             docker rename $CONTAINER $OLD || true
 
-            echo "Run new container"
             docker run -d \
               --name $CONTAINER \
               --restart unless-stopped \
@@ -55,11 +50,9 @@ jobs:
             done
 
             if [ "$SUCCESS" = true ]; then
-              echo "Deploy OK"
               docker rm $OLD || true
               docker image prune -f
             else
-              echo "Deploy FAILED → rollback"
               docker stop $CONTAINER || true
               docker rm $CONTAINER || true
 
