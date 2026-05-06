@@ -1,34 +1,131 @@
-name: Vue CI Pipeline
+name: Vue CD Pipeline
 
 on:
-  pull_request:
-    branches: ["develop"]
+  push:
+    branches:
+      - develop
+      - eyupsosa34-patch-1
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: devboard-webui
 
 jobs:
-  test-build:
+
+  build-and-push:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./DevBoard.WebUI
+    outputs:
+      image: ${{ steps.image.outputs.image }}
 
     steps:
-      - name: Checkout Repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+      - name: Set lowercase owner
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          node-version: 20
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Generate image tag
+        id: image
+        run: |
+          SHORT_SHA=${GITHUB_SHA::7}
+          TAG=${GITHUB_REF_NAME}-${SHORT_SHA}
 
-      - name: Run Lint
-        run: npm run lint
+          IMAGE="${REGISTRY}/${OWNER_LC}/${IMAGE_NAME}:${TAG}"
 
-      - name: Run Tests
-        run: npm run test:unit
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
-      - name: Build Project
-        run: npm run build
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ steps.image.outputs.image }} ./DevBoard.WebUI
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ steps.image.outputs.image }}
+
+      # optional latest tag per branch
+      - name: Push latest per branch
+        run: |
+          LATEST="${REGISTRY}/${OWNER_LC}/${IMAGE_NAME}:${GITHUB_REF_NAME}-latest"
+          docker tag ${{ steps.image.outputs.image }} $LATEST
+          docker push $LATEST
+
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSH_KEY }}
+
+          script: |
+            set -e
+
+            IMAGE="${{ needs.build-and-push.outputs.image }}"
+            CONTAINER="devboard"
+            OLD="devboard_old"
+
+            echo "Deploying: $IMAGE"
+
+            docker pull $IMAGE
+
+            # backup current container
+            if [ "$(docker ps -aq -f name=^/${CONTAINER}$)" ]; then
+              docker stop $CONTAINER || true
+              docker rename $CONTAINER $OLD || true
+            fi
+
+            # run new container
+            docker run -d \
+              --name $CONTAINER \
+              --restart unless-stopped \
+              -p 80:80 \
+              $IMAGE
+
+            # health check
+            SUCCESS=false
+            for i in {1..10}; do
+              if curl -fs http://localhost > /dev/null; then
+                SUCCESS=true
+                break
+              fi
+              sleep 3
+            done
+
+            # rollback logic
+            if [ "$SUCCESS" = true ]; then
+              echo "Deployment successful"
+
+              docker rm $OLD || true
+              docker image prune -f
+
+            else
+              echo "Deployment failed - rollback starting"
+
+              docker stop $CONTAINER || true
+              docker rm $CONTAINER || true
+
+              if [ "$(docker ps -aq -f name=^/${OLD}$)" ]; then
+                docker start $OLD
+                docker rename $OLD $CONTAINER
+              fi
+
+              exit 1
+            fi
