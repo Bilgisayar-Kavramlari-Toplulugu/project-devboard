@@ -1,6 +1,10 @@
 name: Vue CD Pipeline
 
 on:
+  push:
+    branches:
+      - develop
+      
   workflow_run:
     workflows: ["Vue CI Pipeline"]
     types:
@@ -8,7 +12,7 @@ on:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -22,7 +26,7 @@ jobs:
           script: |
             set -e
 
-            if [ "${{ github.event.workflow_run.head_branch }}" != "develop" ]; then
+            if [ "${{ github.event_name }}" = "workflow_run" ] && [ "${{ github.event.workflow_run.head_branch }}" != "develop" ]; then
               echo "Not develop branch → exit"
               exit 0
             fi
@@ -36,7 +40,6 @@ jobs:
 
             echo "Eski container hazırlanıyor"
 
-            # eski container varsa yedekle
             if [ "$(docker ps -aq -f name=^/${CONTAINER}$)" ]; then
               docker stop $CONTAINER || true
               docker rename $CONTAINER $OLD || true
@@ -64,12 +67,10 @@ jobs:
 
             if [ "$SUCCESS" = true ]; then
               echo "Deploy başarılı"
-
               docker rm $OLD || true
               docker image prune -f
-
             else
-              echo "Deploy başarısız → rollback"
+              echo "Deploy başarısız rollback"
 
               docker stop $CONTAINER || true
               docker rm $CONTAINER || true
