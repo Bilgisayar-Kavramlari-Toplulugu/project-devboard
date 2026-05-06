@@ -21,13 +21,13 @@ jobs:
           script: |
             set -e
 
-            IMAGE="ghcr.io/${{ github.repository_owner }}/devboard-webui:${GITHUB_SHA}"
+            IMAGE="ghcr.io/bilgisayar-kavramlari-toplulugu/devboard-webui:${{ github.sha }}"
             CONTAINER="devboard"
             OLD="devboard_old"
 
             echo "Deploying: $IMAGE"
 
-            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
 
             docker pull $IMAGE
 
