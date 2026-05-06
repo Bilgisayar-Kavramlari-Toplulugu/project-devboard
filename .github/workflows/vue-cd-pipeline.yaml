@@ -1,0 +1,86 @@
+name: Vue CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["Vue CI Pipeline"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+
+          script: |
+            set -e
+
+            if [ "${{ github.event.workflow_run.head_branch }}" != "develop" ]; then
+              echo "Not develop branch → exit"
+              exit 0
+            fi
+
+            IMAGE="ghcr.io/${{ github.repository_owner }}/devboard-webui:develop"
+            CONTAINER="devboard"
+            OLD="devboard_old"
+
+            echo "Pull image"
+            docker pull $IMAGE
+
+            echo "Eski container hazırlanıyor"
+
+            # eski container varsa yedekle
+            if [ "$(docker ps -aq -f name=^/${CONTAINER}$)" ]; then
+              docker stop $CONTAINER || true
+              docker rename $CONTAINER $OLD || true
+            fi
+
+            echo "Yeni container başlatılıyor"
+            docker run -d \
+              --name $CONTAINER \
+              --restart unless-stopped \
+              -p 80:80 \
+              $IMAGE
+
+            echo "Health check başlıyor"
+
+            SUCCESS=false
+
+            for i in {1..10}; do
+              if curl -fs http://localhost > /dev/null; then
+                SUCCESS=true
+                break
+              fi
+              echo "Bekleniyor... ($i/10)"
+              sleep 3
+            done
+
+            if [ "$SUCCESS" = true ]; then
+              echo "Deploy başarılı"
+
+              docker rm $OLD || true
+              docker image prune -f
+
+            else
+              echo "Deploy başarısız → rollback"
+
+              docker stop $CONTAINER || true
+              docker rm $CONTAINER || true
+
+              if [ "$(docker ps -aq -f name=^/${OLD}$)" ]; then
+                docker start $OLD
+                docker rename $OLD $CONTAINER
+                echo "↩ rollback başarılı"
+              else
+                echo "eski container bulunamadı"
+              fi
+
+              exit 1
+            fi
