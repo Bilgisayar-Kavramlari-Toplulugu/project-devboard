@@ -1,131 +1,75 @@
-name: Vue CD Pipeline
+name: Vue CI Pipeline
 
 on:
-  push:
-    branches:
-      - develop
-      - eyupsosa34-patch-1
+  pull_request:
+    branches: ["develop"]
+    paths:
+      - "DevBoard.WebUI/**"
 
-permissions:
-  contents: read
-  packages: write
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: devboard-webui
 
 jobs:
-
-  build-and-push:
+  lint:
     runs-on: ubuntu-latest
-
-    outputs:
-      image: ${{ steps.image.outputs.image }}
-
+    defaults:
+      run:
+        working-directory: ./DevBoard.WebUI
     steps:
-      - name: Checkout
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Set lowercase owner
-        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
-
-      - name: Login to GHCR
-        uses: docker/login-action@v3
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          node-version: 20
 
-      - name: Generate image tag
-        id: image
-        run: |
-          SHORT_SHA=${GITHUB_SHA::7}
-          TAG=${GITHUB_REF_NAME}-${SHORT_SHA}
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
 
-          IMAGE="${REGISTRY}/${OWNER_LC}/${IMAGE_NAME}:${TAG}"
+      - name: Run Lint
+        run: npm run lint
 
-          echo "image=$IMAGE" >> $GITHUB_OUTPUT
-
-      - name: Build Docker Image
-        run: |
-          docker build -t ${{ steps.image.outputs.image }} ./DevBoard.WebUI
-
-      - name: Push Docker Image
-        run: |
-          docker push ${{ steps.image.outputs.image }}
-
-      # optional latest tag per branch
-      - name: Push latest per branch
-        run: |
-          LATEST="${REGISTRY}/${OWNER_LC}/${IMAGE_NAME}:${GITHUB_REF_NAME}-latest"
-          docker tag ${{ steps.image.outputs.image }} $LATEST
-          docker push $LATEST
-
-
-  deploy:
-    needs: build-and-push
+  test:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: ./DevBoard.WebUI
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT }}
-          key: ${{ secrets.SSH_KEY }}
+          node-version: 20
 
-          script: |
-            set -e
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
 
-            IMAGE="${{ needs.build-and-push.outputs.image }}"
-            CONTAINER="devboard"
-            OLD="devboard_old"
+      - name: Run Tests
+        run: npm run test:unit
 
-            echo "Deploying: $IMAGE"
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./DevBoard.WebUI
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
-            docker pull $IMAGE
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-            # backup current container
-            if [ "$(docker ps -aq -f name=^/${CONTAINER}$)" ]; then
-              docker stop $CONTAINER || true
-              docker rename $CONTAINER $OLD || true
-            fi
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
 
-            # run new container
-            docker run -d \
-              --name $CONTAINER \
-              --restart unless-stopped \
-              -p 80:80 \
-              $IMAGE
+      - name: Build Project
+        run: npm run build
 
-            # health check
-            SUCCESS=false
-            for i in {1..10}; do
-              if curl -fs http://localhost > /dev/null; then
-                SUCCESS=true
-                break
-              fi
-              sleep 3
-            done
-
-            # rollback logic
-            if [ "$SUCCESS" = true ]; then
-              echo "Deployment successful"
-
-              docker rm $OLD || true
-              docker image prune -f
-
-            else
-              echo "Deployment failed - rollback starting"
-
-              docker stop $CONTAINER || true
-              docker rm $CONTAINER || true
-
-              if [ "$(docker ps -aq -f name=^/${OLD}$)" ]; then
-                docker start $OLD
-                docker rename $OLD $CONTAINER
-              fi
-
-              exit 1
-            fi
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vue-dist
+          path: DevBoard.WebUI/dist
