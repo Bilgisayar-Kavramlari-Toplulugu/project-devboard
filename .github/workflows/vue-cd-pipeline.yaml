@@ -3,7 +3,7 @@ name: Vue CD Pipeline
 on:
   push:
     branches:
-      - develop
+      - ci/cd-test-branch
 
 jobs:
   deploy:
