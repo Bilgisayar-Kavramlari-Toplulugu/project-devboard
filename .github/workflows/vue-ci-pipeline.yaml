@@ -2,14 +2,57 @@ name: Vue CI Pipeline
 
 on:
   push:
-    branches:
-      - develop
+    branches: ["develop"]
+    paths:
+      - "DevBoard.WebUI/**"
 
 permissions:
   contents: read
   packages: write
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./DevBoard.WebUI
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Run Lint
+        run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./DevBoard.WebUI
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Run Tests
+        run: npm run test:unit
+
   build:
     runs-on: ubuntu-latest
     defaults:
@@ -17,31 +60,27 @@ jobs:
         working-directory: ./DevBoard.WebUI
 
     steps:
-      - name: Checkout
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install
+      - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 
-      - name: Build
+      - name: Build Project
         run: npm run build
 
-      - name: Login GHCR
+      - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build Docker Image
         run: |
-          docker build \
-            -t ghcr.io/${{ github.repository_owner }}/devboard-webui:latest \
-            -t ghcr.io/${{ github.repository_owner }}/devboard-webui:${{ github.sha }} \
-            DevBoard.WebUI
+          docker build -t ghcr.io/${{ github.repository_owner }}/devboard-webui:${{ github.sha }} DevBoard.WebUI
 
       - name: Push Docker Image
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/devboard-webui:latest
           docker push ghcr.io/${{ github.repository_owner }}/devboard-webui:${{ github.sha }}
