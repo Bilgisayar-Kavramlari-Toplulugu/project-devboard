@@ -1,0 +1,67 @@
+name: Vue CD Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSH_KEY }}
+
+          script: |
+            set -e
+
+            IMAGE="ghcr.io/bilgisayar-kavramlari-toplulugu/devboard-webui:${{ github.sha }}"
+            CONTAINER="devboard"
+            OLD="devboard_old"
+
+            echo "Deploying: $IMAGE"
+
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
+
+            docker pull $IMAGE
+
+            if [ "$(docker ps -aq -f name=^/${CONTAINER}$)" ]; then
+              docker stop $CONTAINER || true
+              docker rename $CONTAINER $OLD || true
+            fi
+
+            docker run -d \
+              --name $CONTAINER \
+              --restart unless-stopped \
+              -p 80:80 \
+              $IMAGE
+
+            SUCCESS=false
+            for i in {1..10}; do
+              if curl -fs http://localhost > /dev/null; then
+                SUCCESS=true
+                break
+              fi
+              sleep 3
+            done
+
+            if [ "$SUCCESS" = true ]; then
+              docker rm $OLD || true
+              docker image prune -f
+            else
+              docker stop $CONTAINER || true
+              docker rm $CONTAINER || true
+
+              if [ "$(docker ps -aq -f name=^/${OLD}$)" ]; then
+                docker start $OLD
+                docker rename $OLD $CONTAINER
+              fi
+
+              exit 1
+            fi
