@@ -1,10 +1,9 @@
 name: Vue CD Pipeline
 
 on:
-  workflow_run:
-    workflows: ["Vue CI Pipeline"]
-    types:
-      - completed
+  push:
+    branches:
+      - develop
 
 jobs:
   deploy:
@@ -22,7 +21,7 @@ jobs:
           script: |
             set -e
 
-            IMAGE="ghcr.io/bilgisayar-kavramlari-toplulugu/devboard-webui:latest"
+            IMAGE="ghcr.io/bilgisayar-kavramlari-toplulugu/devboard-webui:${{ github.sha }}"
             CONTAINER="devboard"
             OLD="devboard_old"
 
