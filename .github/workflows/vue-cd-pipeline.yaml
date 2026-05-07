@@ -1,14 +1,12 @@
 name: Vue CD Pipeline
 
 on:
-  workflow_run:
-    workflows: ["Vue CI Pipeline"]
-    types:
-      - completed
+  push:
+    branches:
+      - develop
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -23,9 +21,9 @@ jobs:
           script: |
             set -e
 
-            SHORT_SHA=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
+            SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+            IMAGE="ghcr.io/bilgisayar-kavramlari-toplulugu/devboard-webui:sha-${SHORT_SHA}"
 
-            IMAGE="ghcr.io/bilgisayar-kavramlari-toplulugu/devboard-webui:sha-$SHORT_SHA"
             CONTAINER="devboard"
             OLD="devboard_old"
 
