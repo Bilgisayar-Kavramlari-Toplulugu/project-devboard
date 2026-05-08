@@ -1,8 +1,10 @@
 name: Lint & Test Backend
 
 on:
-  pull_request:
-    branches: ["develop"]
+  push:
+    branches:
+      - develop
+      - eyupsosa34-patch-1
     paths:
       - "DevBoard.API/**"
 
