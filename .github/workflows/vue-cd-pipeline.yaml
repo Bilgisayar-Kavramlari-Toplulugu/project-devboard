@@ -1,14 +1,13 @@
 name: Vue CD Pipeline
 
 on:
-  workflow_run:
-    workflows: ["Vue CI Pipeline"]
-    types:
-      - completed
+  push:
+    branches:
+      - develop
+      - eyupsosa34-patch-1
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -25,12 +24,22 @@ jobs:
           script: |
             cd /home/${{ secrets.USERNAME }}/devboard || mkdir -p /home/${{ secrets.USERNAME }}/devboard && cd /home/${{ secrets.USERNAME }}/devboard
 
+            # repo yoksa clone, varsa update
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard.git .
+            else
+              git pull
+            fi
+
             # eski container temizle
             docker stop devboard || true
             docker rm devboard || true
 
-             # image build (VM üzerinde)
-            docker build -t devboard:${{ github.sha }} .
+            # image build
+            docker build \
+              -t devboard:${{ github.sha }} \
+              -f DevBoard.WebUI/Dockerfile \
+              DevBoard.WebUI
 
             # yeni container başlat
             docker run -d \
