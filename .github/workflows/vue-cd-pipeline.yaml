@@ -12,41 +12,34 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Deploy to Server via SSH
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
           port: ${{ secrets.PORT }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-          command_timeout: 40m
-
           script: |
             set -e
 
-            APP_DIR="/home/${{ secrets.USERNAME }}/devboard"
+            APP_DIR=/home/${{ secrets.USERNAME }}/devboard
 
             mkdir -p $APP_DIR
             cd $APP_DIR
 
             if [ ! -d ".git" ]; then
-              git clone --depth=1 https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard.git .
+              git clone https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard.git .
             else
-              git fetch --all
-              git reset --hard origin/eyupsosa34-patch-1
+              git pull origin develop
             fi
 
-            if docker ps -a --format '{{.Names}}' | grep -q devboard; then
-              docker stop devboard || true
-              docker rm devboard || true
-            fi
+            docker stop devboard || true
+            docker rm devboard || true
 
             docker build \
               -t devboard:${{ github.sha }} \
@@ -54,7 +47,6 @@ jobs:
               DevBoard.WebUI
 
             docker run -d \
-              --restart unless-stopped \
               --name devboard \
               -p 5173:5173 \
               devboard:${{ github.sha }}
