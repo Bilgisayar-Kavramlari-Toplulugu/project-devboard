@@ -6,7 +6,7 @@ on:
       - develop
       - eyupsosa34-patch-1
        paths:
-      - "DevBoard.API/**"
+      - "DevBoard.WebUI/**"
 
 jobs:
   deploy:
