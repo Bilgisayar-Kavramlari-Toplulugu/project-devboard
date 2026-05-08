@@ -5,8 +5,6 @@ on:
     branches:
       - develop
       - eyupsosa34-patch-1
-    paths:
-      - "DevBoard.WebUI/**"
 
 jobs:
   deploy:
@@ -25,26 +23,21 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-
             cd /home/${{ secrets.USERNAME }}/devboard || mkdir -p /home/${{ secrets.USERNAME }}/devboard && cd /home/${{ secrets.USERNAME }}/devboard
-
             # repo update
             if [ ! -d ".git" ]; then
               git clone https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard.git .
             else
               git pull
             fi
-
             # container cleanup
             docker stop devboard || true
             docker rm devboard || true
-
             # build image
             docker build \
               -t devboard:${{ github.sha }} \
               -f DevBoard.WebUI/Dockerfile \
               DevBoard.WebUI
-
             # run container
             docker run -d \
               --name devboard \
