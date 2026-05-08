@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -39,6 +42,4 @@ jobs:
             docker run -d \
               --name devboard \
               -p 80:5173 \
-              -e HOST=0.0.0.0 \
-              -e PORT=5173 \
               devboard:${{ github.sha }}
