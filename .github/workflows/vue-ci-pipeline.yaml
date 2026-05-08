@@ -7,13 +7,7 @@ on:
       - eyupsosa34-patch-1
     paths:
       - "DevBoard.WebUI/**"
-
-  push:
-    branches:
-      - develop
-    paths:
-      - "DevBoard.WebUI/**"
-
+      
 concurrency:
   group: vue-ci-${{ github.ref }}
   cancel-in-progress: true
