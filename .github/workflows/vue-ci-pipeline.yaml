@@ -2,9 +2,13 @@ name: Vue CI Pipeline
 
 on:
   push:
-    branches: 
-      - develop
-      - eyupsosa34-patch-1  # for testing only
+    branches:
+      - eyupsosa34-patch-1
+      
+  pull_request:
+    branches:
+      - eyupsosa34-patch-1
+
     paths:
       - "DevBoard.WebUI/**"
 
