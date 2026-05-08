@@ -9,25 +9,31 @@ on:
 jobs:
   deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Stop and Delete Existing Container
-        run: |
-          docker stop devboard || true
-          docker rm devboard || true
+      - name: Sunucuya Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/${{ secrets.USERNAME }}/devboard || mkdir -p /home/${{ secrets.USERNAME }}/devboard && cd /home/${{ secrets.USERNAME }}/devboard
 
-      - name: Remove Old Image
-        run: |
-          docker rmi devboard:latest || true
-          docker rmi devboard:${GITHUB_SHA} || true
+            # eski container temizle
+            docker stop devboard || true
+            docker rm devboard || true
 
-      - name: Run New Container
-        run: |
-          docker run -d \
-            --name devboard \
-            -p 80:80 \
-            devboard:${GITHUB_SHA}
+             # image build (VM üzerinde)
+            docker build -t devboard:${{ github.sha }} .
+
+            # yeni container başlat
+            docker run -d \
+              --name devboard \
+              -p 80:80 \
+              devboard:${{ github.sha }}
