@@ -2,8 +2,11 @@ name: Go Backend CD Pipeline
 
 on:
   push:
-    branches: 
-      - develop
+    branches:
+      - eyupsosa34-patch-1
+  
+  pull_request:
+    branches:
       - eyupsosa34-patch-1
       
     paths:
