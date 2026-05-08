@@ -5,6 +5,7 @@ on:
     branches: ["develop"]
     paths:
       - "DevBoard.API/**"
+      - "eyupsosa34-patch-2"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
