@@ -2,7 +2,9 @@ name: Lint & Test Backend
 
 on:
   pull_request:
-    branches: ["develop"]
+    branches:
+      - develop
+      - eyupsosa34-patch-3
     paths:
       - "DevBoard.API/**"
 concurrency:
