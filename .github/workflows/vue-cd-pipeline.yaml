@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-      - eyupsosa34-patch-1
 
 jobs:
   deploy:
@@ -14,7 +13,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Sunucuya Deploy
+      - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
@@ -22,9 +21,11 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
+
             cd /home/${{ secrets.USERNAME }}/devboard || mkdir -p /home/${{ secrets.USERNAME }}/devboard && cd /home/${{ secrets.USERNAME }}/devboard
 
-            # repo yoksa clone, varsa update
+            # repo güncelle
             if [ ! -d ".git" ]; then
               git clone https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard.git .
             else
@@ -35,14 +36,7 @@ jobs:
             docker stop devboard || true
             docker rm devboard || true
 
-            # image build
-            docker build \
-              -t devboard:${{ github.sha }} \
-              -f DevBoard.WebUI/Dockerfile \
-              DevBoard.WebUI
-
             # yeni container başlat
-            docker run -d \
               --name devboard \
-              -p 80:80 \
+              -p 80:5173 \
               devboard:${{ github.sha }}
