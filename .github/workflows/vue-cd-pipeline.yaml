@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -25,25 +22,23 @@ jobs:
 
             cd /home/${{ secrets.USERNAME }}/devboard || mkdir -p /home/${{ secrets.USERNAME }}/devboard && cd /home/${{ secrets.USERNAME }}/devboard
 
-            # repo update
             if [ ! -d ".git" ]; then
               git clone https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard.git .
             else
               git pull
             fi
 
-            # container cleanup
             docker stop devboard || true
             docker rm devboard || true
 
-            # build image
             docker build \
               -t devboard:${{ github.sha }} \
               -f DevBoard.WebUI/Dockerfile \
               DevBoard.WebUI
 
-            # run container
             docker run -d \
               --name devboard \
               -p 80:5173 \
+              -e HOST=0.0.0.0 \
+              -e PORT=5173 \
               devboard:${{ github.sha }}
