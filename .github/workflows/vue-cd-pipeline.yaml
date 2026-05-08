@@ -25,18 +25,25 @@ jobs:
 
             cd /home/${{ secrets.USERNAME }}/devboard || mkdir -p /home/${{ secrets.USERNAME }}/devboard && cd /home/${{ secrets.USERNAME }}/devboard
 
-            # repo güncelle
+            # repo update
             if [ ! -d ".git" ]; then
               git clone https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard.git .
             else
               git pull
             fi
 
-            # eski container temizle
+            # container cleanup
             docker stop devboard || true
             docker rm devboard || true
 
-            # yeni container başlat
+            # build image
+            docker build \
+              -t devboard:${{ github.sha }} \
+              -f DevBoard.WebUI/Dockerfile \
+              DevBoard.WebUI
+
+            # run container
+            docker run -d \
               --name devboard \
               -p 80:5173 \
               devboard:${{ github.sha }}
