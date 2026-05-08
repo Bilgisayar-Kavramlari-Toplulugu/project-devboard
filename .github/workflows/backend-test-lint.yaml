@@ -1,7 +1,7 @@
 name: Lint & Test Backend
 
 on:
-  pull_request:
+  push:
     branches: 
       - develop
       - eyupsosa34-patch-1
