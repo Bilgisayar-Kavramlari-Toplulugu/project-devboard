@@ -6,7 +6,7 @@ on:
       - develop
       - eyupsosa34-patch-1
     paths:
-      - "DevBoard.WebUI/**"
+      - "DevBoard.API/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
