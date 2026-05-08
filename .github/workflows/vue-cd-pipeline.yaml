@@ -1,0 +1,52 @@
+name: Vue CD Pipeline
+
+on:
+  push:
+    branches:
+      - eyupsosa34-patch-1
+      
+  pull_request:
+    branches:
+      - eyupsosa34-patch-1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            APP_DIR=/home/${{ secrets.USERNAME }}/devboard
+
+            mkdir -p $APP_DIR
+            cd $APP_DIR
+
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard.git .
+            else
+              git pull origin develop
+            fi
+
+            docker stop devboard || true
+            docker rm devboard || true
+
+            docker build \
+              -t devboard:${{ github.sha }} \
+              -f DevBoard.WebUI/Dockerfile \
+              DevBoard.WebUI
+
+            docker run -d \
+              --name devboard \
+              -p 5173:5173 \
+              devboard:${{ github.sha }}
