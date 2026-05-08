@@ -2,11 +2,11 @@ name: Go Backend CD Pipeline
 
 on:
   push:
-    branches:
+    branches: 
       - develop
-      - eyupsosa34-patch-1
+      - eyupsosa34-patch-1  # for testing only
     paths:
-      - "DevBoard.API/**"
+      - "DevBoard.WebUI/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
