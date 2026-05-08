@@ -2,6 +2,7 @@ name: Vue CI Pipeline
 
 on:
   push:
+  pull_request:
     branches: 
       - develop
       - eyupsosa34-patch-1  # for testing only
