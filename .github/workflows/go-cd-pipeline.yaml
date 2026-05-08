@@ -1,0 +1,65 @@
+name: Go Backend CD Pipeline
+
+on:
+  push:
+    branches:
+      - eyupsosa34-patch-1
+      
+  pull_request:
+    branches:
+      - eyupsosa34-patch-1
+
+    paths:
+      - "DevBoard.API/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Deploy Backend via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+          script: |
+            set -e
+
+            mkdir -p /home/${{ secrets.USERNAME }}/devboard
+            cd /home/${{ secrets.USERNAME }}/devboard
+
+            # repo update
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/Bilgisayar-Kavramlari-Toplulugu/project-devboard.git .
+            else
+              git pull
+            fi
+
+            # eski backend container cleanup
+            docker stop devboard-api || true
+            docker rm devboard-api || true
+
+            # eski image cleanup (opsiyonel)
+            docker image prune -f || true
+
+            # backend image build
+            docker build \
+              -t devboard-api:${{ github.sha }} \
+              -f DevBoard.API/Dockerfile \
+              DevBoard.API
+
+            # backend container run
+            docker run -d \
+              --name devboard-api \
+              -p 8080:8080 \
+              devboard-api:${{ github.sha }}
