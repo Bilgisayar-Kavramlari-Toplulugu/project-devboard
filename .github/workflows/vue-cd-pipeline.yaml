@@ -5,6 +5,8 @@ on:
     branches:
       - develop
       - eyupsosa34-patch-1
+       paths:
+      - "DevBoard.API/**"
 
 jobs:
   deploy:
