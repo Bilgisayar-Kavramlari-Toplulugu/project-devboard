@@ -1,11 +1,17 @@
 name: Lint & Test Backend
 
 on:
+  push:
+    branches:
+      - eyupsosa34-patch-1
+      
   pull_request:
-    branches: ["develop"]
+    branches:
+      - eyupsosa34-patch-1
+
     paths:
       - "DevBoard.API/**"
-
+      
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
