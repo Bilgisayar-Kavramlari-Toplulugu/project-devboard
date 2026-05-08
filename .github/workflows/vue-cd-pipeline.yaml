@@ -25,13 +25,6 @@ jobs:
           docker rmi devboard:latest || true
           docker rmi devboard:${GITHUB_SHA} || true
 
-      - name: Build New Image
-        run: |
-          docker build \
-            -t devboard:${GITHUB_SHA} \
-            -t devboard:latest \
-            ./DevBoard.WebUI
-
       - name: Run New Container
         run: |
           docker run -d \
