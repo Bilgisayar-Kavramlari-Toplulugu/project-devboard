@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - develop
+      - eyupsosa34-patch-3
     paths:
       - "DevBoard.WebUI/**"
 
