@@ -3,9 +3,12 @@ name: Vue CD Pipeline
 on:
   push:
     branches:
-      - develop
       - eyupsosa34-patch-1
-
+      
+  pull_request:
+    branches:
+      - eyupsosa34-patch-1
+      
 jobs:
   deploy:
     runs-on: ubuntu-latest
