@@ -12,13 +12,15 @@ const router = createRouter({
           path: '',
           name: 'MainPage',
           component: () => import('../views/MainPage.vue')
+        },
+        {
+          // E-posta linkinden token ile gelindiğinde MainLayout içinde
+          // ResetPasswordDialog otomatik olarak açılır (MainLayout'taki route watcher)
+          path: 'reset-password',
+          name: 'ResetPassword',
+          component: () => import('../views/MainPage.vue')
         }
       ]
-    },
-    {
-      path: '/login',
-      name: 'Login',
-      component: () => import('../views/LoginPage.vue')
     }
   ],
 });

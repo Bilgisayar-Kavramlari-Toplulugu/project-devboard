@@ -28,7 +28,24 @@
     </main>
 
     <!-- Auth Dialog -->
-    <AuthDialog v-model="authOpen" :initial-mode="authMode" />
+    <AuthDialog
+      v-model="authOpen"
+      :initial-mode="authMode"
+      @open-forgot="openForgot"
+    />
+
+    <!-- Forgot Password Dialog -->
+    <ForgotPasswordDialog
+      v-model="forgotOpen"
+      @open-login="openAuth('login')"
+    />
+
+    <!-- Reset Password Dialog -->
+    <ResetPasswordDialog
+      v-model="resetOpen"
+      @open-login="openAuth('login')"
+      @open-forgot="openForgot"
+    />
 
     <!-- Footer -->
     <footer class="footer">
@@ -74,16 +91,38 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import AuthDialog from '../components/AuthDialog.vue'
+import ForgotPasswordDialog from '../components/ForgotPasswordDialog.vue'
+import ResetPasswordDialog from '../components/ResetPasswordDialog.vue'
+
+const route = useRoute()
 
 const authOpen = ref(false)
 const authMode = ref('login')
+const forgotOpen = ref(false)
+const resetOpen = ref(false)
 
 function openAuth(mode) {
   authMode.value = mode
   authOpen.value = true
 }
+
+function openForgot() {
+  forgotOpen.value = true
+}
+
+// Reset password linkinden gelindiğinde dialog otomatik açılır
+watch(
+  () => route.name,
+  (name) => {
+    if (name === 'ResetPassword') {
+      resetOpen.value = true
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>

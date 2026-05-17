@@ -16,7 +16,7 @@
             <div class="track" :class="{ 'show-signup': mode === 'signup' }">
 
               <!-- LOG IN -->
-              <div class="panel" aria-hidden="mode !== 'login'">
+              <div class="panel" :aria-hidden="mode !== 'login'">
                 <div class="panel-head">
                   <h2 class="dialog-title">Welcome back</h2>
                   <p class="dialog-sub">Log in to your account</p>
@@ -43,11 +43,15 @@
                     <span v-if="loginErr.password" class="field-error">{{ loginErr.password }}</span>
                   </div>
 
-                  <!-- Spacer: signup'taki Confirm Password alanıyla piksel eşitliği -->
-                  <div class="field field-spacer" aria-hidden="true">
-                    <label class="label">&nbsp;</label>
-                    <div class="input-wrap">
-                      <input class="input" tabindex="-1" disabled placeholder=" " />
+                  <!-- Forgot password + spacer satırı -->
+                  <div class="field field-spacer-row" :aria-hidden="mode !== 'login'">
+                    <div class="forgot-row">
+                      <button
+                        type="button"
+                        class="forgot-link"
+                        :tabindex="mode === 'login' ? 0 : -1"
+                        @click="openForgot"
+                      >Forgot password?</button>
                     </div>
                   </div>
 
@@ -64,7 +68,7 @@
               </div>
 
               <!-- SIGN UP -->
-              <div class="panel" aria-hidden="mode !== 'signup'">
+              <div class="panel" :aria-hidden="mode !== 'signup'">
                 <div class="panel-head">
                   <h2 class="dialog-title">Create account</h2>
                   <p class="dialog-sub">Join 20k+ developers on DevBoard</p>
@@ -140,7 +144,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onUnmounted } from 'vue'
 
 const EmailIcon = {
   template: `<svg class="input-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>`
@@ -153,7 +157,7 @@ const props = defineProps({
   modelValue: { type: Boolean, default: false },
   initialMode: { type: String, default: 'login' }
 })
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'open-forgot'])
 
 const mode = ref(props.initialMode)
 const showConfirm = ref(false)
@@ -174,9 +178,16 @@ function close() {
   emit('update:modelValue', false)
 }
 
+function openForgot() {
+  close()
+  emit('open-forgot')
+}
+
 function onKeydown(e) {
   if (e.key === 'Escape') close()
 }
+
+onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 
 watch(() => props.modelValue, (val) => {
   if (val) {
@@ -432,6 +443,36 @@ async function handleSignup() {
   transition: color 0.2s;
 }
 .switch-link:hover { color: #c084fc; }
+
+/* ── FORGOT ── */
+.field-spacer-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  /* signup'taki confirm password alanıyla yaklaşık yükseklik eşitliği */
+  min-height: 62px;
+  justify-content: flex-end;
+}
+
+.forgot-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.forgot-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: #a855f7;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.forgot-link:hover { color: #c084fc; }
 
 /* ── OVERLAY FADE ── */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.22s ease; }
